@@ -35,3 +35,8 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.bak
+
+# Supabase temporary configuration
+**/.temp/
+**/supabase/.temp/
+**/.temp/
