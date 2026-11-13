@@ -1,0 +1,571 @@
+
+import {
+  NavLink,
+  Outlet,
+  useNavigate
+} from 'react-router-dom';
+
+import {
+  useEffect,
+  useState,
+  createContext,
+  useContext
+} from 'react';
+
+import {
+  HomeIcon,
+  CubeIcon,
+  ArrowsRightLeftIcon,
+  TruckIcon,
+  TagIcon,
+  BuildingStorefrontIcon,
+  ChartBarIcon,
+  Cog6ToothIcon,
+  WrenchScrewdriverIcon,
+  Bars3Icon,
+  BellIcon,
+  MagnifyingGlassIcon,
+  ArrowRightOnRectangleIcon,
+  BuildingOffice2Icon
+} from '@heroicons/react/24/outline';
+
+import { supabase } from '../../lib/supabase';
+import { InventoryProvider } from '../../context/InventoryContext';
+
+const WorkspaceContext = createContext(null);
+
+const SELECTED_BUSINESS_KEY = 'stockwise-selected-business-id';
+
+const LOGO_PATH = '/images/BlaQsWatch%20Golden%20Eye%20Inventory%20Logo.png';
+
+export function useWorkspace() {
+  const context = useContext(WorkspaceContext);
+
+  if (!context) {
+    throw new Error('useWorkspace must be used inside DashboardLayout.');
+  }
+
+  return context;
+}
+
+const nav = [
+  { label: 'Overview', to: '/', icon: HomeIcon },
+  { label: 'Products', to: '/parts', icon: CubeIcon },
+  { label: 'Inventory overview', to: '/inventory', icon: CubeIcon },
+  { label: 'Stock control', to: '/stock-control', icon: ArrowsRightLeftIcon },
+  { label: 'Warehouses & locations', to: '/warehouses', icon: BuildingOffice2Icon },
+  { label: 'Categories', to: '/categories', icon: TagIcon },
+  { label: 'Suppliers', to: '/suppliers', icon: BuildingStorefrontIcon },
+  { label: 'Manufacturers', to: '/manufacturers', icon: WrenchScrewdriverIcon },
+  { label: 'Vehicle fitment', to: '/vehicles', icon: TruckIcon },
+  { label: 'Reports', to: '/reports', icon: ChartBarIcon }
+];
+
+export default function DashboardLayout() {
+  const [open, setOpen] = useState(false);
+
+  const [user, setUser] = useState(null);
+  const [profile, setProfile] = useState(null);
+
+  const [businesses, setBusinesses] = useState([]);
+  const [selectedBusinessId, setSelectedBusinessId] = useState('');
+
+  const [workspaceLoading, setWorkspaceLoading] = useState(true);
+  const [workspaceError, setWorkspaceError] = useState('');
+
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [logoutError, setLogoutError] = useState('');
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadUser() {
+      const { data, error } = await supabase.auth.getUser();
+
+      if (error) {
+        console.error('Unable to load authenticated user:', error);
+        return;
+      }
+
+      if (mounted) {
+        setUser(data.user);
+      }
+    }
+
+    loadUser();
+
+    const {
+      data: { subscription }
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (mounted) {
+        setUser(session?.user ?? null);
+      }
+    });
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadWorkspace() {
+      if (!user) {
+        setProfile(null);
+        setBusinesses([]);
+        setSelectedBusinessId('');
+        setWorkspaceLoading(false);
+        return;
+      }
+
+      setWorkspaceLoading(true);
+      setWorkspaceError('');
+
+      try {
+        const [
+          { data: profileData, error: profileError },
+          { data: membershipData, error: membershipError }
+        ] = await Promise.all([
+          supabase
+            .from('profiles')
+            .select('id, full_name, email, role, active')
+            .eq('id', user.id)
+            .maybeSingle(),
+
+          supabase
+            .from('business_members')
+            .select('business_id, role')
+            .eq('user_id', user.id)
+            .eq('active', true)
+        ]);
+
+        if (profileError) throw profileError;
+        if (membershipError) throw membershipError;
+
+        if (!profileData || !profileData.active) {
+          throw new Error('Your user profile is missing or inactive.');
+        }
+
+        if (!membershipData || membershipData.length === 0) {
+          throw new Error(
+            'You do not currently have access to an active business.'
+          );
+        }
+
+        const businessIds = membershipData.map(
+          membership => membership.business_id
+        );
+
+        const {
+          data: businessData,
+          error: businessError
+        } = await supabase
+          .from('businesses')
+          .select('id, name, active')
+          .in('id', businessIds)
+          .eq('active', true);
+
+        if (businessError) throw businessError;
+
+        const activeBusinesses = (businessData || []).map(business => {
+          const membership = membershipData.find(
+            item => item.business_id === business.id
+          );
+
+          return {
+            ...business,
+            role: membership?.role || 'staff'
+          };
+        });
+
+        if (activeBusinesses.length === 0) {
+          throw new Error(
+            'No active businesses are available to your account.'
+          );
+        }
+
+        if (!mounted) return;
+
+        setProfile(profileData);
+        setBusinesses(activeBusinesses);
+
+        const savedBusinessId = localStorage.getItem(
+          SELECTED_BUSINESS_KEY
+        );
+
+        const validSavedBusiness = activeBusinesses.find(
+          business => business.id === savedBusinessId
+        );
+
+        const nextBusinessId = validSavedBusiness
+          ? validSavedBusiness.id
+          : activeBusinesses[0].id;
+
+        setSelectedBusinessId(nextBusinessId);
+
+        localStorage.setItem(
+          SELECTED_BUSINESS_KEY,
+          nextBusinessId
+        );
+      } catch (error) {
+        console.error('Workspace loading failed:', error);
+
+        if (mounted) {
+          setProfile(null);
+          setBusinesses([]);
+          setSelectedBusinessId('');
+
+          setWorkspaceError(
+            error.message || 'Unable to load your business workspace.'
+          );
+        }
+      } finally {
+        if (mounted) {
+          setWorkspaceLoading(false);
+        }
+      }
+    }
+
+    loadWorkspace();
+
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
+
+  const selectedBusiness =
+    businesses.find(
+      business => business.id === selectedBusinessId
+    ) || null;
+
+  const selectedRole = selectedBusiness?.role || null;
+
+  function handleBusinessChange(event) {
+    const businessId = event.target.value;
+
+    const belongsToUser = businesses.some(
+      business => business.id === businessId
+    );
+
+    if (!belongsToUser) return;
+
+    setSelectedBusinessId(businessId);
+
+    localStorage.setItem(
+      SELECTED_BUSINESS_KEY,
+      businessId
+    );
+  }
+
+  const displayName =
+    profile?.full_name ||
+    user?.user_metadata?.full_name ||
+    user?.user_metadata?.name ||
+    user?.email ||
+    'User';
+
+  const avatarLetter = displayName.charAt(0).toUpperCase();
+
+  async function logout() {
+    if (loggingOut) return;
+
+    setLoggingOut(true);
+    setLogoutError('');
+
+    try {
+      const { error } = await supabase.auth.signOut();
+
+      if (error) throw error;
+
+      localStorage.removeItem(SELECTED_BUSINESS_KEY);
+
+      navigate('/login', { replace: true });
+    } catch (error) {
+      console.error('Logout failed:', error);
+
+      setLogoutError('Unable to sign out. Please try again.');
+      setLoggingOut(false);
+    }
+  }
+
+  const workspace = {
+    user,
+    profile,
+    businesses,
+    selectedBusiness,
+    selectedBusinessId,
+    role: selectedRole,
+    loading: workspaceLoading,
+    error: workspaceError,
+    changeBusiness: handleBusinessChange
+  };
+
+  return (
+    <WorkspaceContext.Provider value={workspace}>
+      <div className="app-shell">
+        <aside className={`sidebar ${open ? 'sidebar-open' : ''}`}>
+
+          {/* Brand */}
+          <div className="sidebar-brand">
+            <img
+              src={LOGO_PATH}
+              alt="BlaQsWatch Golden Eye"
+              className="sidebar-brand-logo"
+            />
+
+            <span className="sidebar-brand-text">
+              <span className="brand-name">
+                BlaQsWatch
+              </span>
+
+              <small>INVENTORY</small>
+              <small className="brand-tagline">
+                Nothing Goes Unnoticed.
+              </small>
+            </span>
+
+            <button
+              className="mobile-close"
+              onClick={() => setOpen(false)}
+              aria-label="Close navigation"
+            >
+              ×
+            </button>
+          </div>
+
+          {/* Workspace */}
+          <div className="workspace-label">
+            BUSINESS WORKSPACE
+          </div>
+
+          {workspaceLoading ? (
+            <div className="business-workspace workspace-loading">
+              Loading business...
+            </div>
+          ) : selectedBusiness ? (
+            <div className="business-workspace">
+              <div className="workspace-business-icon">
+                <BuildingOffice2Icon />
+              </div>
+
+              {businesses.length > 1 ? (
+                <select
+                  value={selectedBusinessId}
+                  onChange={handleBusinessChange}
+                  aria-label="Select business"
+                >
+                  {businesses.map(business => (
+                    <option key={business.id} value={business.id}>
+                      {business.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className="workspace-business-details">
+                  <strong>{selectedBusiness.name}</strong>
+                  <small>{selectedRole} access</small>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="workspace-error">
+              {workspaceError || 'No business selected'}
+            </div>
+          )}
+
+          {/* Main Navigation */}
+          <div className="sidebar-section-label">
+            MANAGEMENT
+          </div>
+
+          <nav className="sidebar-navigation">
+            {nav.map(({ label, to, icon: Icon }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={to === '/'}
+                onClick={() => setOpen(false)}
+                className={({ isActive }) =>
+                  `nav-link ${isActive ? 'active' : ''}`
+                }
+              >
+                <Icon />
+                <span>{label}</span>
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* Bottom Navigation */}
+          <div className="sidebar-bottom">
+            <div className="sidebar-section-label">
+              PREFERENCES
+            </div>
+
+            <NavLink
+              to="/settings"
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `nav-link ${isActive ? 'active' : ''}`
+              }
+            >
+              <Cog6ToothIcon />
+              <span>Settings</span>
+            </NavLink>
+
+            <div className="sidebar-note">
+              <div className="sidebar-note-eye">
+                <img
+                  src={LOGO_PATH}
+                  alt=""
+                />
+              </div>
+
+              <strong>Nothing Goes Unnoticed.</strong>
+
+              <p>
+                Stay ahead of every product, movement and transaction.
+              </p>
+            </div>
+
+            {/* User Profile */}
+            <div className="profile-row">
+              <div className="avatar">
+                {avatarLetter}
+              </div>
+
+              <div className="profile-details">
+                <strong>{displayName}</strong>
+                <small>{user?.email || 'Authenticated user'}</small>
+              </div>
+
+              <button
+                title={loggingOut ? 'Signing out...' : 'Sign out'}
+                aria-label="Sign out"
+                onClick={logout}
+                disabled={loggingOut}
+              >
+                <ArrowRightOnRectangleIcon />
+              </button>
+            </div>
+          </div>
+        </aside>
+
+        {open && (
+          <div
+            className="mobile-scrim"
+            onClick={() => setOpen(false)}
+          />
+        )}
+
+        <main className="main-area">
+
+          {/* Top Header */}
+          <header className="topbar">
+            <button
+              className="mobile-menu"
+              onClick={() => setOpen(true)}
+              aria-label="Open navigation"
+            >
+              <Bars3Icon />
+            </button>
+
+            <div className="breadcrumb">
+              <span className="breadcrumb-root">
+                WORKSPACE
+              </span>
+
+              <span className="breadcrumb-divider">/</span>
+
+              <strong>
+                {selectedBusiness?.name || 'Inventory'}
+              </strong>
+            </div>
+
+            <div className="topbar-right">
+              <div className="top-search">
+                <MagnifyingGlassIcon />
+
+                <input
+                  placeholder="Search products..."
+                  onKeyDown={event => {
+                    if (event.key === 'Enter') {
+                      navigate(
+                        '/parts?q=' +
+                        encodeURIComponent(event.target.value)
+                      );
+                    }
+                  }}
+                />
+              </div>
+
+              <div className="topbar-divider" />
+
+              <button
+                className="icon-button"
+                title="Notifications"
+                aria-label="Notifications"
+              >
+                <BellIcon />
+                <i />
+              </button>
+
+              <div className="top-user">
+                <div className="top-avatar">
+                  {avatarLetter}
+                </div>
+
+                <div className="top-user-details">
+                  <strong>{displayName}</strong>
+                  <small>{selectedRole || 'User'}</small>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          {logoutError && (
+            <div className="form-error" role="alert">
+              {logoutError}
+            </div>
+          )}
+
+          {/* Application Content */}
+          {workspaceError ? (
+            <div className="page-content">
+              <div className="form-error" role="alert">
+                {workspaceError}
+              </div>
+            </div>
+          ) : workspaceLoading ? (
+            <div className="page-content">
+              <div className="workspace-loading-screen">
+                <img src={LOGO_PATH} alt="BlaQsWatch" />
+                <p>Preparing your workspace...</p>
+              </div>
+            </div>
+          ) : (
+            <div className="page-content">
+              <InventoryProvider businessId={selectedBusinessId}>
+                <Outlet />
+              </InventoryProvider>
+            </div>
+          )}
+
+          {/* Footer */}
+          <footer className="app-footer">
+            <span>
+              © {new Date().getFullYear()} BlaQsWatch
+            </span>
+
+            <span className="footer-tagline">
+              Nothing Goes Unnoticed. · Inventory Management
+            </span>
+          </footer>
+        </main>
+      </div>
+    </WorkspaceContext.Provider>
+  );
+}
