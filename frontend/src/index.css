@@ -2220,6 +2220,39 @@ tbody td strong {
   display: none;
 }
 
+.login-brand-logo {
+  width: min(100%, 340px);
+  height: 220px;
+  object-fit: contain;
+  object-position: left center;
+  margin: 0 0 28px;
+  filter: drop-shadow(0 8px 22px rgba(212, 175, 55, 0.12));
+  position: relative;
+  z-index: 1;
+}
+
+.mobile-mark img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.mobile-mark {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  .mobile-mark {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .login-brand-logo {
+    display: none;
+  }
+}
+
 /* =========================================================
    20. MOBILE NAVIGATION
 ========================================================= */
@@ -2584,30 +2617,63 @@ tbody td strong {
 
 
 
-
-
-
-
-
+/* =========================================================
+   APPLICATION FOOTER — GLOBAL
+========================================================= */
 
 .app-shell {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--bw-black);
 }
 
 .app-main {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }
 
 .app-footer {
   width: 100%;
-  padding: 16px 24px;
+  margin: 0;
+  padding: 17px 24px;
   text-align: center;
-  font-size: 12px;
-  color: #888;
-  border-top: 1px solid rgba(128, 128, 128, 0.15);
-  background: transparent;
+  font-size: 10px;
+  line-height: 1.6;
+  color: #928A79;
+  background: #101114;
+  border-top: 1px solid rgba(212, 175, 55, 0.13);
+  flex-shrink: 0;
+}
+
+.app-footer span {
+  float: none;
+  display: inline;
+}
+
+/* Dashboard footer aligns with the content, not the sidebar */
+body:has(.sidebar) .app-footer {
+  width: calc(100% - 258px);
+  margin-left: 258px;
+}
+
+@media (max-width: 1100px) {
+  body:has(.sidebar) .app-footer {
+    width: calc(100% - 220px);
+    margin-left: 220px;
+  }
+}
+
+@media (max-width: 760px) {
+  body:has(.sidebar) .app-footer {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .app-footer {
+    padding: 14px 15px;
+    font-size: 9px;
+  }
 }

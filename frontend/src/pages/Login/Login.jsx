@@ -10,6 +10,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { supabase, isSupabaseConfigured } from '../../lib/supabase';
 
+const LOGO_PATH = '/images/BlaQsWatch Golden Eye Inventory Logo.png';
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,9 +52,7 @@ export default function Login() {
           password
         });
 
-      if (signInError) {
-        throw signInError;
-      }
+      if (signInError) throw signInError;
 
       navigate('/', { replace: true });
     } catch (err) {
@@ -102,9 +102,7 @@ export default function Login() {
           redirectTo: `${window.location.origin}/auth/reset-password`
         });
 
-      if (resetRequestError) {
-        throw resetRequestError;
-      }
+      if (resetRequestError) throw resetRequestError;
 
       setResetMessage(
         'If an account exists for this email, a password-reset link has been sent. Check your inbox and spam folder.'
@@ -122,12 +120,11 @@ export default function Login() {
   return (
     <main className="login-page">
       <section className="login-brand">
-        <div className="brand-mark">
-          <WrenchScrewdriverIcon />
-        </div>
-
-        <p className="eyebrow">INVENTORY CONTROL, SIMPLIFIED</p>
-        <h1>BlaQsWatch</h1>
+        <img
+          src={LOGO_PATH}
+          alt="BlaQsWatch Golden Eye Inventory"
+          className="login-brand-logo"
+        />
 
         <p className="login-intro">
           One place to manage every product, every movement and every part
@@ -150,7 +147,8 @@ export default function Login() {
       <section className="login-panel">
         <form className="login-card" onSubmit={submit}>
           <div className="mobile-mark">
-            <WrenchScrewdriverIcon /> BlaQsWatch
+            <img src={LOGO_PATH} alt="BlaQsWatch" />
+            <span>BlaQsWatch</span>
           </div>
 
           <p className="eyebrow">WELCOME BACK</p>

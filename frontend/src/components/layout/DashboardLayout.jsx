@@ -574,16 +574,6 @@ export default function DashboardLayout() {
             </div>
           )}
 
-          {/* Footer */}
-          <footer className="app-footer">
-            <span>
-              © {new Date().getFullYear()} BlaQsWatch
-            </span>
-
-            <span className="footer-tagline">
-              Nothing Goes Unnoticed. · Inventory Management
-            </span>
-          </footer>
         </main>
       </div>
     </WorkspaceContext.Provider>

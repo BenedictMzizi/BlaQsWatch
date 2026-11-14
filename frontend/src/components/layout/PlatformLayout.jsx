@@ -211,12 +211,7 @@ export default function PlatformLayout() {
           <Outlet />
         </div>
 
-        <footer className="app-footer">
-          <span>© {new Date().getFullYear()} BlaQsWatch</span>
-          <span className="footer-tagline">
-            Nothing Goes Unnoticed. · Platform Administration
-          </span>
-        </footer>
+        
       </main>
     </div>
   );
