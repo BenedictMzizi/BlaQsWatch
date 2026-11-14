@@ -1,8 +1,10 @@
+
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import {
   HomeIcon,
   BuildingOffice2Icon,
+  UserGroupIcon,
   ArrowRightOnRectangleIcon,
   Bars3Icon,
   ShieldCheckIcon,
@@ -13,7 +15,8 @@ const LOGO_PATH = '/images/BlaQsWatch%20Golden%20Eye%20Inventory%20Logo.png';
 
 const platformNav = [
   { label: 'Platform overview', to: '/platform', icon: HomeIcon, end: true },
-  { label: 'Company management', to: '/platform/companies', icon: BuildingOffice2Icon, end: false },
+  { label: 'Companies', to: '/platform/companies', icon: BuildingOffice2Icon, end: false },
+  { label: 'Employees', to: '/platform/employees', icon: UserGroupIcon, end: false },
 ];
 
 export default function PlatformLayout() {
@@ -26,9 +29,11 @@ export default function PlatformLayout() {
     if (loggingOut) return;
     setLoggingOut(true);
     setLogoutError('');
+
     try {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+
       localStorage.removeItem('stockwise-selected-business-id');
       navigate('/login', { replace: true });
     } catch (error) {
@@ -70,7 +75,8 @@ export default function PlatformLayout() {
               onClick={() => setOpen(false)}
               className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
             >
-              <Icon /><span>{label}</span>
+              <Icon />
+              <span>{label}</span>
             </NavLink>
           ))}
         </nav>
@@ -80,11 +86,13 @@ export default function PlatformLayout() {
           <NavLink to="/" onClick={() => setOpen(false)} className="nav-link">
             <BuildingOffice2Icon /><span>Company workspace</span>
           </NavLink>
+
           <div className="sidebar-note">
             <div className="sidebar-note-eye"><img src={LOGO_PATH} alt="" /></div>
             <strong>Platform control</strong>
             <p>Manage BlaQsWatch companies and platform access.</p>
           </div>
+
           <div className="profile-row">
             <div className="avatar"><ShieldCheckIcon /></div>
             <div className="profile-details">
@@ -127,7 +135,9 @@ export default function PlatformLayout() {
         </header>
 
         {logoutError && <div className="form-error" role="alert">{logoutError}</div>}
+
         <div className="page-content"><Outlet /></div>
+
         <footer className="app-footer">
           <span>© {new Date().getFullYear()} BlaQsWatch</span>
           <span className="footer-tagline">Nothing Goes Unnoticed. · Platform Administration</span>

@@ -1,9 +1,12 @@
+
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
 import PlatformLayout from '../components/layout/PlatformLayout';
 
 import Login from '../pages/Login/Login';
+import AuthCallback from '../pages/AuthCallback/AuthCallback';
+
 import Dashboard from '../pages/Dashboard/Dashboard';
 import Parts from '../pages/Parts/Parts';
 import StockControl from '../pages/Inventory/Inventory';
@@ -20,22 +23,29 @@ import PartDetails from '../pages/PartDetails/PartDetails';
 import PlatformRoute from './PlatformRoute';
 import PlatformDashboard from '../pages/Platform/PlatformDashboard';
 import CompanyManagement from '../pages/Platform/CompanyManagement';
+import EmployeeManagement from '../pages/Platform/EmployeeManagement';
 import ProtectedRoute from './ProtectedRoute';
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public authentication routes */}
         <Route path="/login" element={<Login />} />
+        <Route path="/auth/callback" element={<AuthCallback />} />
 
+        {/* Protected application routes */}
         <Route element={<ProtectedRoute />}>
+          {/* Platform administration */}
           <Route path="/platform" element={<PlatformRoute />}>
             <Route element={<PlatformLayout />}>
               <Route index element={<PlatformDashboard />} />
               <Route path="companies" element={<CompanyManagement />} />
+              <Route path="employees" element={<EmployeeManagement />} />
             </Route>
           </Route>
 
+          {/* Company workspace */}
           <Route element={<DashboardLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="parts" element={<Parts />} />
@@ -52,6 +62,7 @@ export default function AppRoutes() {
           </Route>
         </Route>
 
+        {/* Unknown routes */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

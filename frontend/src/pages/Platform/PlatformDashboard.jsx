@@ -1,8 +1,8 @@
+
 import { Link } from 'react-router-dom';
 import {
   BuildingOffice2Icon,
   UserGroupIcon,
-  ClipboardDocumentCheckIcon,
   ShieldCheckIcon,
   ArrowRightIcon,
 } from '@heroicons/react/24/outline';
@@ -15,7 +15,7 @@ export default function PlatformDashboard() {
           <p className="eyebrow">BLAQSWATCH CONTROL CENTRE</p>
           <h1>Platform overview</h1>
           <p className="muted">
-            Manage BlaQsWatch companies, onboarding and platform access.
+            Manage BlaQsWatch companies, employees and platform access.
           </p>
         </div>
         <div className="dashboard-heading-icon"><ShieldCheckIcon /></div>
@@ -25,29 +25,20 @@ export default function PlatformDashboard() {
         <Link to="/platform/companies" className="platform-management-card">
           <span className="platform-management-icon"><BuildingOffice2Icon /></span>
           <span className="platform-management-copy">
-            <strong>Company management</strong>
-            <small>Register companies, inspect memberships, activate or suspend access.</small>
+            <strong>Companies</strong>
+            <small>Register companies, inspect memberships and manage company access.</small>
           </span>
           <ArrowRightIcon className="platform-management-arrow" />
         </Link>
 
-        <Link to="/platform/companies" className="platform-management-card">
-          <span className="platform-management-icon"><ClipboardDocumentCheckIcon /></span>
-          <span className="platform-management-copy">
-            <strong>Company onboarding</strong>
-            <small>Register a company and invite its first administrator.</small>
-          </span>
-          <ArrowRightIcon className="platform-management-arrow" />
-        </Link>
-
-        <div className="platform-management-card is-planned">
+        <Link to="/platform/employees" className="platform-management-card">
           <span className="platform-management-icon"><UserGroupIcon /></span>
           <span className="platform-management-copy">
-            <strong>Employee administration</strong>
-            <small>Employee invitations, role changes and offboarding are the next module.</small>
-            <em>Planned next phase</em>
+            <strong>Employees</strong>
+            <small>Manage employee invitations, company memberships, roles and access.</small>
           </span>
-        </div>
+          <ArrowRightIcon className="platform-management-arrow" />
+        </Link>
       </div>
 
       <section className="platform-workspace-card">
