@@ -15,11 +15,14 @@ const InventoryContext = createContext(null);
 const IMAGE_BUCKET = 'product-images';
 const MAX_PRODUCT_IMAGES = 4;
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+
 const ALLOWED_IMAGE_TYPES = [
   'image/jpeg',
   'image/png',
   'image/webp',
 ];
+
+const SUPPORTED_CURRENCIES = ['ZAR', 'USD', 'GBP', 'EUR'];
 
 const emptyData = {
   products: [],
@@ -177,6 +180,10 @@ export function InventoryProvider({ children, businessId }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
+  // ---------------------------------------------------------
+  // LOAD INVENTORY AND BUSINESS SETTINGS
+  // ---------------------------------------------------------
+
   const refresh = useCallback(async () => {
     if (!businessId) {
       setData(emptyData);
@@ -201,6 +208,8 @@ export function InventoryProvider({ children, businessId }) {
         movementsResult,
         oemResult,
         compatibilityResult,
+        businessResult,
+        settingsResult,
       ] = await Promise.all([
         supabase
           .from('parts')
@@ -269,6 +278,18 @@ export function InventoryProvider({ children, businessId }) {
         supabase
           .from('part_vehicle_compatibility')
           .select('id,part_id,vehicle_id,notes'),
+
+        supabase
+          .from('businesses')
+          .select('id,name')
+          .eq('id', businessId)
+          .maybeSingle(),
+
+        supabase
+          .from('business_settings')
+          .select('business_id,currency,low_stock_default')
+          .eq('business_id', businessId)
+          .maybeSingle(),
       ]);
 
       const parts = unwrap(partsResult) || [];
@@ -282,13 +303,27 @@ export function InventoryProvider({ children, businessId }) {
       const inventory = safeData(inventoryResult, 'Inventory');
       const movements = safeData(movementsResult, 'Stock movements');
       const oemNumbers = safeData(oemResult, 'OEM numbers');
+
       const compatibility = safeData(
         compatibilityResult,
         'Vehicle compatibility'
       );
 
-      // Images are loaded separately because part_images is linked
-      // to parts through part_id. Business access is enforced by RLS.
+      // Business identity and settings are required for the
+      // Settings page, so do not silently ignore their errors.
+      if (businessResult.error) {
+        throw businessResult.error;
+      }
+
+      if (settingsResult.error) {
+        throw settingsResult.error;
+      }
+
+      const business = businessResult.data;
+      const savedSettings = settingsResult.data;
+
+      // Load product images separately.
+      // Access is enforced by the existing Supabase RLS policies.
       let productImages = [];
 
       if (parts.length) {
@@ -305,7 +340,9 @@ export function InventoryProvider({ children, businessId }) {
 
       productImages.forEach(image => {
         const current = imagesByPart.get(image.part_id) || [];
+
         current.push(mapProductImage(image));
+
         imagesByPart.set(image.part_id, current);
       });
 
@@ -333,7 +370,9 @@ export function InventoryProvider({ children, businessId }) {
 
       inventory.forEach(row => {
         const current = productInventory.get(row.part_id) || [];
+
         current.push(row);
+
         productInventory.set(row.part_id, current);
       });
 
@@ -341,7 +380,9 @@ export function InventoryProvider({ children, businessId }) {
 
       oemNumbers.forEach(row => {
         const current = productOEM.get(row.part_id) || [];
+
         current.push(row);
+
         productOEM.set(row.part_id, current);
       });
 
@@ -349,7 +390,9 @@ export function InventoryProvider({ children, businessId }) {
 
       compatibility.forEach(row => {
         const current = productCompatibility.get(row.part_id) || [];
+
         current.push(row);
+
         productCompatibility.set(row.part_id, current);
       });
 
@@ -369,8 +412,11 @@ export function InventoryProvider({ children, businessId }) {
         const extraOEM = (productOEM.get(part.id) || [])[0];
 
         const images = imagesByPart.get(part.id) || [];
+
         const primaryImage =
-          images.find(image => image.isPrimary) || images[0] || null;
+          images.find(image => image.isPrimary) ||
+          images[0] ||
+          null;
 
         return {
           id: part.id,
@@ -378,8 +424,10 @@ export function InventoryProvider({ children, businessId }) {
           name: part.description,
 
           category: categoryMap.get(part.category_id)?.name || '',
+
           manufacturer:
             manufacturerMap.get(part.manufacturer_id)?.name || '',
+
           supplier:
             supplierMap.get(part.supplier_id)?.company_name || '',
 
@@ -439,9 +487,22 @@ export function InventoryProvider({ children, businessId }) {
 
       setData({
         ...emptyData,
+
+        // Persisted business settings.
+        settings: {
+          businessName: business?.name || '',
+          currency: savedSettings?.currency || 'ZAR',
+          lowStockDefault: Number(
+            savedSettings?.low_stock_default ?? 5
+          ),
+        },
+
         products,
+
         categories: categories.map(item => item.name),
+
         manufacturers: manufacturers.map(item => item.name),
+
         suppliers: suppliers.map(item => item.company_name),
 
         vehicles: vehicles.map(vehicle => ({
@@ -467,6 +528,7 @@ export function InventoryProvider({ children, businessId }) {
       console.error('Inventory loading failed:', err);
 
       setError(err.message || 'Unable to load inventory data.');
+
       setData(emptyData);
 
     } finally {
@@ -478,8 +540,14 @@ export function InventoryProvider({ children, businessId }) {
     refresh();
   }, [refresh]);
 
+  // ---------------------------------------------------------
+  // PRODUCT HELPERS
+  // ---------------------------------------------------------
+
   function getProductForBusiness(partId) {
-    const product = data.products.find(item => item.id === partId);
+    const product = data.products.find(
+      item => item.id === partId
+    );
 
     if (!product) {
       throw new Error(
@@ -517,6 +585,10 @@ export function InventoryProvider({ children, businessId }) {
 
     return getImageExtension(file);
   }
+
+  // ---------------------------------------------------------
+  // CATEGORY, MANUFACTURER AND SUPPLIER HELPERS
+  // ---------------------------------------------------------
 
   async function resolveCategory(name) {
     const categoryName = String(name || '').trim();
@@ -642,6 +714,10 @@ export function InventoryProvider({ children, businessId }) {
     return location;
   }
 
+  // ---------------------------------------------------------
+  // SAVE PRODUCT
+  // ---------------------------------------------------------
+
   async function saveProduct(product) {
     if (!businessId) {
       throw new Error('No business is selected.');
@@ -675,7 +751,8 @@ export function InventoryProvider({ children, businessId }) {
 
     if (
       existingProduct &&
-      Number(product.quantity || 0) !== Number(existingProduct.quantity || 0)
+      Number(product.quantity || 0) !==
+        Number(existingProduct.quantity || 0)
     ) {
       throw new Error(
         'Product details cannot change stock quantities. Use Stock Control to receive, issue or adjust stock.'
@@ -885,8 +962,10 @@ export function InventoryProvider({ children, businessId }) {
     return savedPart;
   }
 
-  // Upload one or more images to an existing product.
-  // Files are stored under businessId/partId in the public bucket.
+  // ---------------------------------------------------------
+  // PRODUCT IMAGE MANAGEMENT
+  // ---------------------------------------------------------
+
   async function uploadProductImages(partId, files) {
     if (!businessId) {
       throw new Error('No business is selected.');
@@ -900,7 +979,10 @@ export function InventoryProvider({ children, businessId }) {
 
     const existingImages = await getProductImageRows(partId);
 
-    if (existingImages.length + selectedFiles.length > MAX_PRODUCT_IMAGES) {
+    if (
+      existingImages.length + selectedFiles.length >
+      MAX_PRODUCT_IMAGES
+    ) {
       throw new Error(
         `A product can have a maximum of ${MAX_PRODUCT_IMAGES} images. You can add ${Math.max(
           0,
@@ -911,7 +993,9 @@ export function InventoryProvider({ children, businessId }) {
 
     selectedFiles.forEach(validateImageFile);
 
-    let hasPrimary = existingImages.some(image => image.is_primary);
+    let hasPrimary = existingImages.some(
+      image => image.is_primary
+    );
 
     if (existingImages.length && !hasPrimary) {
       const firstImage = existingImages[0];
@@ -932,7 +1016,9 @@ export function InventoryProvider({ children, businessId }) {
     for (const file of selectedFiles) {
       const extension = validateImageFile(file);
       const fileName = `${makeFileId()}.${extension}`;
-      const storagePath = `${businessId}/${partId}/${fileName}`;
+
+      const storagePath =
+        `${businessId}/${partId}/${fileName}`;
 
       const uploadResult = await supabase.storage
         .from(IMAGE_BUCKET)
@@ -953,7 +1039,9 @@ export function InventoryProvider({ children, businessId }) {
           .from(IMAGE_BUCKET)
           .remove([storagePath]);
 
-        throw new Error('Could not generate a public URL for the uploaded image.');
+        throw new Error(
+          'Could not generate a public URL for the uploaded image.'
+        );
       }
 
       const insertResult = await supabase
@@ -974,7 +1062,10 @@ export function InventoryProvider({ children, businessId }) {
         throw insertResult.error;
       }
 
-      uploadedImages.push(mapProductImage(insertResult.data));
+      uploadedImages.push(
+        mapProductImage(insertResult.data)
+      );
+
       hasPrimary = true;
     }
 
@@ -983,8 +1074,6 @@ export function InventoryProvider({ children, businessId }) {
     return uploadedImages;
   }
 
-  // Replace an existing image without deleting it until the new
-  // upload and database update have both succeeded.
   async function replaceProductImage(imageId, file) {
     if (!businessId) {
       throw new Error('No business is selected.');
@@ -1002,7 +1091,10 @@ export function InventoryProvider({ children, businessId }) {
 
     getProductForBusiness(image.part_id);
 
-    const oldStoragePath = getStoragePathFromUrl(image.image_url);
+    const oldStoragePath = getStoragePathFromUrl(
+      image.image_url
+    );
+
     const newStoragePath =
       `${businessId}/${image.part_id}/${makeFileId()}.${extension}`;
 
@@ -1014,7 +1106,9 @@ export function InventoryProvider({ children, businessId }) {
         upsert: false,
       });
 
-    if (uploadResult.error) throw uploadResult.error;
+    if (uploadResult.error) {
+      throw uploadResult.error;
+    }
 
     const newImageUrl = getPublicImageUrl(newStoragePath);
 
@@ -1023,7 +1117,9 @@ export function InventoryProvider({ children, businessId }) {
         .from(IMAGE_BUCKET)
         .remove([newStoragePath]);
 
-      throw new Error('Could not generate a public URL for the replacement image.');
+      throw new Error(
+        'Could not generate a public URL for the replacement image.'
+      );
     }
 
     const updateResult = await supabase
@@ -1104,7 +1200,9 @@ export function InventoryProvider({ children, businessId }) {
 
     getProductForBusiness(image.part_id);
 
-    const storagePath = getStoragePathFromUrl(image.image_url);
+    const storagePath = getStoragePathFromUrl(
+      image.image_url
+    );
 
     if (storagePath) {
       const storageResult = await supabase.storage
@@ -1146,6 +1244,10 @@ export function InventoryProvider({ children, businessId }) {
 
     await refresh();
   }
+
+  // ---------------------------------------------------------
+  // DELETE PRODUCT
+  // ---------------------------------------------------------
 
   async function deleteProduct(id) {
     if (!businessId) {
@@ -1228,6 +1330,10 @@ export function InventoryProvider({ children, businessId }) {
 
     await refresh();
   }
+
+  // ---------------------------------------------------------
+  // STOCK MOVEMENTS
+  // ---------------------------------------------------------
 
   async function moveStock({
     productId,
@@ -1385,9 +1491,15 @@ export function InventoryProvider({ children, businessId }) {
     return result.data;
   }
 
+  // ---------------------------------------------------------
+  // CATEGORY MANAGEMENT
+  // ---------------------------------------------------------
+
   async function addCategory(name) {
     const category = await resolveCategory(name);
+
     await refresh();
+
     return category;
   }
 
@@ -1431,6 +1543,10 @@ export function InventoryProvider({ children, businessId }) {
     await refresh();
   }
 
+  // ---------------------------------------------------------
+  // MANUFACTURER MANAGEMENT
+  // ---------------------------------------------------------
+
   async function addManufacturer(name) {
     if (!name?.trim()) {
       throw new Error('Enter a manufacturer name.');
@@ -1446,6 +1562,10 @@ export function InventoryProvider({ children, businessId }) {
 
     await refresh();
   }
+
+  // ---------------------------------------------------------
+  // SUPPLIER MANAGEMENT
+  // ---------------------------------------------------------
 
   async function addSupplier(name) {
     if (!name?.trim()) {
@@ -1469,6 +1589,10 @@ export function InventoryProvider({ children, businessId }) {
 
     await refresh();
   }
+
+  // ---------------------------------------------------------
+  // VEHICLE MANAGEMENT
+  // ---------------------------------------------------------
 
   async function saveVehicle(vehicle) {
     if (!vehicle.make?.trim() || !vehicle.model?.trim()) {
@@ -1532,15 +1656,105 @@ export function InventoryProvider({ children, businessId }) {
     await refresh();
   }
 
-  function updateSettings(settings) {
+  // ---------------------------------------------------------
+  // BUSINESS SETTINGS
+  // ---------------------------------------------------------
+
+  async function updateSettings(settings) {
+    if (!businessId) {
+      throw new Error('No business is selected.');
+    }
+
+    const businessName = String(
+      settings.businessName ??
+      data.settings.businessName ??
+      ''
+    ).trim();
+
+    const currency = String(
+      settings.currency ??
+      data.settings.currency ??
+      'ZAR'
+    ).trim().toUpperCase();
+
+    const lowStockDefault = Number(
+      settings.lowStockDefault ??
+      data.settings.lowStockDefault ??
+      5
+    );
+
+    if (!businessName) {
+      throw new Error('Business name is required.');
+    }
+
+    if (!SUPPORTED_CURRENCIES.includes(currency)) {
+      throw new Error('Select a supported currency.');
+    }
+
+    if (
+      !Number.isInteger(lowStockDefault) ||
+      lowStockDefault < 0
+    ) {
+      throw new Error(
+        'The low-stock threshold must be a whole number of zero or greater.'
+      );
+    }
+
+    // Update the business name.
+    const businessResult = await supabase
+      .from('businesses')
+      .update({
+        name: businessName,
+      })
+      .eq('id', businessId)
+      .select('id,name')
+      .single();
+
+    if (businessResult.error) {
+      throw businessResult.error;
+    }
+
+    // Save the inventory settings separately for this business.
+    const settingsResult = await supabase
+      .from('business_settings')
+      .upsert(
+        {
+          business_id: businessId,
+          currency,
+          low_stock_default: lowStockDefault,
+        },
+        {
+          onConflict: 'business_id',
+        }
+      )
+      .select(
+        'business_id,currency,low_stock_default'
+      )
+      .single();
+
+    if (settingsResult.error) {
+      throw settingsResult.error;
+    }
+
+    const savedSettings = {
+      businessName: businessResult.data.name,
+      currency: settingsResult.data.currency,
+      lowStockDefault: Number(
+        settingsResult.data.low_stock_default
+      ),
+    };
+
     setData(current => ({
       ...current,
-      settings: {
-        ...current.settings,
-        ...settings,
-      },
+      settings: savedSettings,
     }));
+
+    return savedSettings;
   }
+
+  // ---------------------------------------------------------
+  // CONTEXT ACTIONS
+  // ---------------------------------------------------------
 
   const actions = useMemo(
     () => ({
@@ -1555,10 +1769,13 @@ export function InventoryProvider({ children, businessId }) {
 
       addCategory,
       removeCategory,
+
       addManufacturer,
       addSupplier,
+
       saveVehicle,
       removeVehicle,
+
       updateSettings,
       refresh,
     }),
@@ -1570,6 +1787,10 @@ export function InventoryProvider({ children, businessId }) {
       value={{
         ...data,
         ...actions,
+
+        // Expose the selected business to Settings and other pages.
+        businessId,
+
         loading,
         error,
       }}
@@ -1578,6 +1799,10 @@ export function InventoryProvider({ children, businessId }) {
     </InventoryContext.Provider>
   );
 }
+
+// -----------------------------------------------------------
+// INVENTORY CONTEXT HOOK
+// -----------------------------------------------------------
 
 export function useInventoryData() {
   const value = useContext(InventoryContext);

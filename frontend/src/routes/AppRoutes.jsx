@@ -1,4 +1,3 @@
-
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 import DashboardLayout from '../components/layout/DashboardLayout';
@@ -6,6 +5,7 @@ import PlatformLayout from '../components/layout/PlatformLayout';
 
 import Login from '../pages/Login/Login';
 import AuthCallback from '../pages/AuthCallback/AuthCallback';
+import PasswordReset from '../pages/PasswordReset/PasswordReset';
 
 import Dashboard from '../pages/Dashboard/Dashboard';
 import Parts from '../pages/Parts/Parts';
@@ -33,6 +33,7 @@ export default function AppRoutes() {
         {/* Public authentication routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
+        <Route path="/auth/reset-password" element={<PasswordReset />} />
 
         {/* Protected application routes */}
         <Route element={<ProtectedRoute />}>

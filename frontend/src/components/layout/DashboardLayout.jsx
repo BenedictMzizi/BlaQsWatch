@@ -443,12 +443,32 @@ export default function DashboardLayout() {
               </div>
 
               <button
+                type="button"
+                className="profile-signout-button"
                 title={loggingOut ? 'Signing out...' : 'Sign out'}
                 aria-label="Sign out"
                 onClick={logout}
                 disabled={loggingOut}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '7px',
+                  flexShrink: 0,
+                  padding: '8px 10px',
+                  border: '1px solid var(--border-color, rgba(255,255,255,0.16))',
+                  borderRadius: '8px',
+                  background: 'transparent',
+                  color: 'inherit',
+                  cursor: loggingOut ? 'not-allowed' : 'pointer',
+                  opacity: loggingOut ? 0.6 : 1,
+                  whiteSpace: 'nowrap'
+                }}
               >
-                <ArrowRightOnRectangleIcon />
+                <ArrowRightOnRectangleIcon
+                  style={{ width: '19px', height: '19px' }}
+                />
+                <span>{loggingOut ? 'Signing out...' : 'Sign out'}</span>
               </button>
             </div>
           </div>

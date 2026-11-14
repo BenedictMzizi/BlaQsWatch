@@ -114,19 +114,53 @@ textarea:focus-visible {
   position: fixed;
   inset: 0 auto 0 0;
   width: 258px;
+
+  /* Keep the sidebar within the visible screen */
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+
   background: linear-gradient(
     180deg,
     #151619 0%,
     #101114 55%,
     #0A0A0C 100%
   );
-  color: var(--bw-white);
+
   padding: 23px 15px 15px;
+
   display: flex;
   flex-direction: column;
+
+  /* Allow the entire sidebar to scroll when necessary */
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 55, 0.45) transparent;
+
   z-index: 20;
   border-right: 1px solid rgba(212, 175, 55, 0.18);
   box-shadow: 8px 0 35px rgba(0, 0, 0, 0.25);
+}
+
+/* Sidebar scrollbar — Chrome, Edge and Safari */
+.sidebar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.4);
+  border-radius: 10px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.7);
 }
 
 .main-area {
