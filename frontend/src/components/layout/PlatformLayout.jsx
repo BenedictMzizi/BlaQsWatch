@@ -1,3 +1,4 @@
+
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import {
@@ -7,15 +8,37 @@ import {
   ArrowRightOnRectangleIcon,
   Bars3Icon,
   ShieldCheckIcon,
+  CreditCardIcon,
 } from '@heroicons/react/24/outline';
 import { supabase } from '../../lib/supabase';
 
 const LOGO_PATH = '/images/BlaQsWatch%20Golden%20Eye%20Inventory%20Logo.png';
 
 const platformNav = [
-  { label: 'Platform overview', to: '/platform', icon: HomeIcon, end: true },
-  { label: 'Companies', to: '/platform/companies', icon: BuildingOffice2Icon, end: false },
-  { label: 'Employees', to: '/platform/employees', icon: UserGroupIcon, end: false },
+  {
+    label: 'Platform overview',
+    to: '/platform',
+    icon: HomeIcon,
+    end: true,
+  },
+  {
+    label: 'Companies',
+    to: '/platform/companies',
+    icon: BuildingOffice2Icon,
+    end: false,
+  },
+  {
+    label: 'Employees',
+    to: '/platform/employees',
+    icon: UserGroupIcon,
+    end: false,
+  },
+  {
+    label: 'Subscriptions',
+    to: '/platform/subscriptions',
+    icon: CreditCardIcon,
+    end: false,
+  },
 ];
 
 export default function PlatformLayout() {
@@ -57,10 +80,13 @@ export default function PlatformLayout() {
           <span className="sidebar-brand-text">
             <span className="brand-name">BlaQsWatch</span>
             <small>PLATFORM</small>
-            <small className="brand-tagline">Nothing Goes Unnoticed.</small>
+            <small className="brand-tagline">
+              Nothing Goes Unnoticed.
+            </small>
           </span>
 
           <button
+            type="button"
             className="mobile-close"
             onClick={() => setOpen(false)}
             aria-label="Close navigation"
@@ -69,7 +95,9 @@ export default function PlatformLayout() {
           </button>
         </div>
 
-        <div className="workspace-label">PLATFORM ADMINISTRATION</div>
+        <div className="workspace-label">
+          PLATFORM ADMINISTRATION
+        </div>
 
         <div className="business-workspace">
           <div className="workspace-business-icon">
@@ -82,7 +110,9 @@ export default function PlatformLayout() {
           </div>
         </div>
 
-        <div className="sidebar-section-label">MANAGEMENT</div>
+        <div className="sidebar-section-label">
+          MANAGEMENT
+        </div>
 
         <nav className="sidebar-navigation">
           {platformNav.map(({ label, to, icon: Icon, end }) => (
@@ -102,7 +132,9 @@ export default function PlatformLayout() {
         </nav>
 
         <div className="sidebar-bottom">
-          <div className="sidebar-section-label">WORKSPACES</div>
+          <div className="sidebar-section-label">
+            WORKSPACES
+          </div>
 
           <NavLink
             to="/"
@@ -119,7 +151,9 @@ export default function PlatformLayout() {
             </div>
 
             <strong>Platform control</strong>
-            <p>Manage BlaQsWatch companies and platform access.</p>
+            <p>
+              Manage BlaQsWatch companies and platform access.
+            </p>
           </div>
 
           <div className="profile-row">
@@ -152,13 +186,16 @@ export default function PlatformLayout() {
                 color: 'inherit',
                 cursor: loggingOut ? 'not-allowed' : 'pointer',
                 opacity: loggingOut ? 0.6 : 1,
-                whiteSpace: 'nowrap'
+                whiteSpace: 'nowrap',
               }}
             >
               <ArrowRightOnRectangleIcon
                 style={{ width: '19px', height: '19px' }}
               />
-              <span>{loggingOut ? 'Signing out...' : 'Sign out'}</span>
+
+              <span>
+                {loggingOut ? 'Signing out...' : 'Sign out'}
+              </span>
             </button>
           </div>
         </div>
@@ -174,6 +211,7 @@ export default function PlatformLayout() {
       <main className="main-area">
         <header className="topbar">
           <button
+            type="button"
             className="mobile-menu"
             onClick={() => setOpen(true)}
             aria-label="Open navigation"
@@ -182,8 +220,12 @@ export default function PlatformLayout() {
           </button>
 
           <div className="breadcrumb">
-            <span className="breadcrumb-root">BLAQSWATCH</span>
+            <span className="breadcrumb-root">
+              BLAQSWATCH
+            </span>
+
             <span className="breadcrumb-divider">/</span>
+
             <strong>Platform administration</strong>
           </div>
 
@@ -210,8 +252,6 @@ export default function PlatformLayout() {
         <div className="page-content">
           <Outlet />
         </div>
-
-        
       </main>
     </div>
   );

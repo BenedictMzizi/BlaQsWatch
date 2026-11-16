@@ -1,4 +1,3 @@
-
 import AppRoutes from './routes/AppRoutes';
 import { InventoryProvider } from './context/InventoryContext';
 import Footer from './components/layout/Footer';

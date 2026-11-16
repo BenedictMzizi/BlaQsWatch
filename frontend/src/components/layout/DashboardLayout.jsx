@@ -1,4 +1,3 @@
-
 import {
   NavLink,
   Outlet,
@@ -27,7 +26,8 @@ import {
   MagnifyingGlassIcon,
   ArrowRightOnRectangleIcon,
   BuildingOffice2Icon,
-  UserGroupIcon
+  UserGroupIcon,
+  CreditCardIcon
 } from '@heroicons/react/24/outline';
 
 import { supabase } from '../../lib/supabase';
@@ -248,12 +248,20 @@ export default function DashboardLayout() {
   // Company Admins only: keep this separate from platform administration.
   const visibleNav = [
     ...nav,
+
     ...(selectedRole === 'admin'
-      ? [{
-          label: 'Employee Management',
-          to: '/employees',
-          icon: UserGroupIcon
-        }]
+      ? [
+          {
+            label: 'Employee Management',
+            to: '/employees',
+            icon: UserGroupIcon
+          },
+          {
+            label: 'Subscription',
+            to: '/subscription',
+            icon: CreditCardIcon
+          }
+        ]
       : [])
   ];
 
