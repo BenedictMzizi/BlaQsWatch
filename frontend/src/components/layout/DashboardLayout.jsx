@@ -1,3 +1,4 @@
+
 import {
   NavLink,
   Outlet,
@@ -27,7 +28,8 @@ import {
   ArrowRightOnRectangleIcon,
   BuildingOffice2Icon,
   UserGroupIcon,
-  CreditCardIcon
+  CreditCardIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
 
 import { supabase } from '../../lib/supabase';
@@ -59,7 +61,10 @@ const nav = [
   { label: 'Suppliers', to: '/suppliers', icon: BuildingStorefrontIcon },
   { label: 'Manufacturers', to: '/manufacturers', icon: WrenchScrewdriverIcon },
   { label: 'Vehicle fitment', to: '/vehicles', icon: TruckIcon },
-  { label: 'Reports', to: '/reports', icon: ChartBarIcon }
+  { label: 'Reports', to: '/reports', icon: ChartBarIcon },
+
+  // Company communication
+  { label: 'Messages', to: '/messages', icon: ChatBubbleLeftRightIcon }
 ];
 
 export default function DashboardLayout() {

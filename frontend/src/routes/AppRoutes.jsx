@@ -28,10 +28,12 @@ import PlatformDashboard from '../pages/Platform/PlatformDashboard';
 import CompanyManagement from '../pages/Platform/CompanyManagement';
 import EmployeeManagement from '../pages/Platform/EmployeeManagement';
 import SubscriptionManagement from '../pages/Platform/SubscriptionManagement';
+import PlatformMessages from '../pages/Platform/PlatformMessages';
 
 import CompanyEmployeeManagement from '../pages/Company/EmployeeManagement';
 import CompanySubscription from '../pages/Company/CompanySubscription';
 
+import Messages from '../pages/Messages/Messages';
 import PublicSubscriptions from '../pages/Subscriptions/PublicSubscriptions';
 
 import ProtectedRoute from './ProtectedRoute';
@@ -82,6 +84,11 @@ export default function AppRoutes() {
                 path="subscriptions"
                 element={<SubscriptionManagement />}
               />
+
+              <Route
+                path="messages"
+                element={<PlatformMessages />}
+              />
             </Route>
           </Route>
 
@@ -109,6 +116,11 @@ export default function AppRoutes() {
             <Route path="categories" element={<Categories />} />
             <Route path="reports" element={<Reports />} />
             <Route path="settings" element={<Settings />} />
+
+            <Route
+              path="messages"
+              element={<Messages />}
+            />
 
             {/* Company administrator routes */}
             <Route element={<CompanyAdminRoute />}>

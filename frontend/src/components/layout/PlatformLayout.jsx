@@ -1,6 +1,7 @@
 
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+
 import {
   HomeIcon,
   BuildingOffice2Icon,
@@ -9,7 +10,9 @@ import {
   Bars3Icon,
   ShieldCheckIcon,
   CreditCardIcon,
+  ChatBubbleLeftRightIcon
 } from '@heroicons/react/24/outline';
+
 import { supabase } from '../../lib/supabase';
 
 const LOGO_PATH = '/images/BlaQsWatch%20Golden%20Eye%20Inventory%20Logo.png';
@@ -39,12 +42,19 @@ const platformNav = [
     icon: CreditCardIcon,
     end: false,
   },
+  {
+    label: 'Support inbox',
+    to: '/platform/messages',
+    icon: ChatBubbleLeftRightIcon,
+    end: false,
+  },
 ];
 
 export default function PlatformLayout() {
   const [open, setOpen] = useState(false);
   const [loggingOut, setLoggingOut] = useState(false);
   const [logoutError, setLogoutError] = useState('');
+
   const navigate = useNavigate();
 
   async function logout() {
@@ -59,9 +69,11 @@ export default function PlatformLayout() {
       if (error) throw error;
 
       localStorage.removeItem('stockwise-selected-business-id');
+
       navigate('/login', { replace: true });
     } catch (error) {
       console.error('Platform logout failed:', error);
+
       setLogoutError('Unable to sign out. Please try again.');
       setLoggingOut(false);
     }
