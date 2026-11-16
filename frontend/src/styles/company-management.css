@@ -1,0 +1,514 @@
+/* =========================================================
+   BLAQSWATCH — COMPANY EMPLOYEE MANAGEMENT
+   Black & Gold UI
+   ========================================================= */
+
+.employee-management-page {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  color: #EDE6D7;
+}
+
+/* Page heading */
+
+.employee-management-page .page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 22px;
+  margin-bottom: 25px;
+}
+
+.employee-management-page .eyebrow {
+  margin: 0 0 8px;
+  color: #C5A64B;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .16em;
+}
+
+.employee-management-page .page-header h1 {
+  margin: 0;
+  color: #F2EBDD;
+  font-size: clamp(22px, 2.2vw, 29px);
+  font-weight: 650;
+  letter-spacing: -.035em;
+}
+
+.employee-management-page .page-header .muted {
+  margin-top: 7px;
+  color: #A69E8E;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.employee-management-page .page-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  flex-wrap: wrap;
+}
+
+.employee-management-page .button-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+}
+
+/* Statistics */
+
+.employee-management-page .stats-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 13px;
+  max-width: 620px;
+  margin-bottom: 22px;
+}
+
+.employee-management-page .stat-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 94px;
+  min-width: 0;
+  padding: 17px 19px;
+  border: 1px solid rgba(212, 175, 55, .16);
+  border-radius: 9px;
+  background: linear-gradient(145deg, #1D1E22, #151619);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, .12);
+}
+
+.employee-management-page .stat-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+  border: 1px solid rgba(212, 175, 55, .12);
+  border-radius: 9px;
+  color: #E2C66E;
+  background: rgba(212, 175, 55, .10);
+}
+
+.employee-management-page .stat-icon svg {
+  width: 19px;
+  height: 19px;
+}
+
+.employee-management-page .stat-label {
+  display: block;
+  margin-bottom: 5px;
+  color: #A69E8E;
+  font-size: 10px;
+}
+
+.employee-management-page .stat-card strong {
+  display: block;
+  color: #F0E8D8;
+  font-size: 23px;
+  font-weight: 700;
+}
+
+/* Content panels */
+
+.employee-management-page .content-card {
+  min-width: 0;
+  margin-bottom: 19px;
+  padding: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(212, 175, 55, .14);
+  border-radius: 9px;
+  background: linear-gradient(145deg, #1D1E22, #151619);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+}
+
+.employee-management-page .section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 17px;
+}
+
+.employee-management-page .section-heading h2 {
+  margin: 0;
+  color: #EEE6D5;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.employee-management-page .section-heading .muted {
+  margin: 7px 0 0;
+  color: #A69E8E;
+  font-size: 10px;
+  line-height: 1.6;
+}
+
+/* Tables */
+
+.employee-management-page .table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid rgba(212, 175, 55, .10);
+  border-radius: 7px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(190, 157, 68, .45) #17181B;
+}
+
+.employee-management-page .data-table {
+  width: 100%;
+  min-width: 700px;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.employee-management-page .data-table thead {
+  background: rgba(212, 175, 55, .055);
+}
+
+.employee-management-page .data-table th {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(212, 175, 55, .15);
+  color: #BDAE8D;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .075em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.employee-management-page .data-table td {
+  padding: 13px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, .055);
+  color: #D5CEBF;
+  font-size: 10px;
+  vertical-align: middle;
+}
+
+.employee-management-page .data-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.employee-management-page .data-table tbody tr {
+  transition: background .16s ease;
+}
+
+.employee-management-page .data-table tbody tr:hover {
+  background: rgba(212, 175, 55, .035);
+}
+
+.employee-management-page .data-table td:first-child {
+  min-width: 175px;
+  color: #EEE6D5;
+  font-weight: 600;
+}
+
+.employee-management-page .table-subtext {
+  display: block;
+  margin-top: 4px;
+  color: #A39B8A;
+  font-size: 9px;
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+/* Role selector */
+
+.employee-management-page .table-select {
+  width: auto;
+  min-width: 112px;
+  min-height: 32px;
+  padding: 6px 27px 6px 9px;
+  border: 1px solid rgba(212, 175, 55, .19);
+  border-radius: 5px;
+  background-color: #191A1E;
+  color: #EDE4D3;
+  font-size: 10px;
+}
+
+.employee-management-page .table-select:focus,
+.employee-management-page .form-control:focus {
+  outline: none;
+  border-color: #D4AF37;
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, .10);
+}
+
+.employee-management-page .table-select:disabled {
+  opacity: .55;
+  cursor: wait;
+}
+
+/* Membership status */
+
+.employee-management-page .status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 61px;
+  padding: 5px 8px;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.employee-management-page .status-active {
+  border: 1px solid rgba(76, 190, 145, .15);
+  color: #70D5AC;
+  background: rgba(54, 185, 135, .11);
+}
+
+.employee-management-page .status-inactive {
+  border: 1px solid rgba(225, 107, 99, .15);
+  color: #E99A91;
+  background: rgba(225, 107, 99, .10);
+}
+
+/* Buttons */
+
+.employee-management-page .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  white-space: nowrap;
+  transition: border-color .18s, background .18s, transform .18s;
+}
+
+.employee-management-page .btn:disabled {
+  opacity: .55;
+  cursor: not-allowed;
+}
+
+.employee-management-page .btn-small {
+  min-height: 30px;
+  padding: 6px 10px;
+  border-radius: 5px;
+  font-size: 9px;
+}
+
+.employee-management-page .btn-danger {
+  border: 1px solid rgba(225, 107, 99, .24);
+  color: #E99A91;
+  background: rgba(225, 107, 99, .08);
+}
+
+.employee-management-page .btn-danger:hover:not(:disabled) {
+  border-color: rgba(225, 107, 99, .48);
+  background: rgba(225, 107, 99, .14);
+}
+
+/* Empty and loading states */
+
+.employee-management-page .empty-state,
+.employee-management-page .loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 155px;
+  padding: 25px 18px;
+  color: #A39B8A;
+  text-align: center;
+}
+
+.employee-management-page .empty-state-icon {
+  width: 27px;
+  height: 27px;
+  margin-bottom: 10px;
+  color: #BDA45E;
+}
+
+.employee-management-page .empty-state h3,
+.employee-management-page .empty-state h2 {
+  margin: 0 0 6px;
+  color: #EEE6D5;
+  font-size: 13px;
+}
+
+.employee-management-page .empty-state p {
+  max-width: 390px;
+  margin: 0;
+  color: #A39B8A;
+  font-size: 10px;
+  line-height: 1.65;
+}
+
+.employee-management-page .loading-state {
+  min-height: 110px;
+  font-size: 10px;
+}
+
+/* Invitation modal */
+
+.employee-management-page .modal-backdrop {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+  background: rgba(5, 5, 6, .78);
+  backdrop-filter: blur(5px);
+}
+
+.employee-management-page .modal-card {
+  width: min(100%, 480px);
+  max-height: min(90vh, 720px);
+  padding: 24px;
+  overflow-y: auto;
+  border: 1px solid rgba(212, 175, 55, .24);
+  border-radius: 11px;
+  background: linear-gradient(150deg, #202125, #151619 75%);
+  box-shadow: 0 24px 80px rgba(0, 0, 0, .48);
+}
+
+.employee-management-page .modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  margin-bottom: 22px;
+}
+
+.employee-management-page .modal-header h2 {
+  margin: 0;
+  color: #F0E8D8;
+  font-size: 19px;
+}
+
+.employee-management-page .icon-button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border: 1px solid rgba(212, 175, 55, .16);
+  border-radius: 7px;
+  color: #C8B98F;
+  background: rgba(255, 255, 255, .025);
+  cursor: pointer;
+}
+
+.employee-management-page .icon-button:hover {
+  border-color: rgba(212, 175, 55, .42);
+  color: #F0D77F;
+  background: rgba(212, 175, 55, .08);
+}
+
+.employee-management-page .icon-button svg {
+  width: 17px;
+  height: 17px;
+}
+
+.employee-management-page .modal-card form {
+  display: flex;
+  flex-direction: column;
+}
+
+.employee-management-page .form-label {
+  display: block;
+  margin: 0 0 7px;
+  color: #D8CEB9;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.employee-management-page .modal-card .form-control {
+  width: 100%;
+  min-height: 40px;
+  margin: 0 0 17px;
+  padding: 10px 12px;
+  border: 1px solid rgba(212, 175, 55, .19);
+  border-radius: 6px;
+  color: #EEE6D5;
+  background: #191A1E;
+  font-size: 11px;
+}
+
+.employee-management-page .form-hint {
+  margin: -2px 0 20px;
+  padding: 10px 12px;
+  border-left: 2px solid #B99A43;
+  border-radius: 0 5px 5px 0;
+  color: #B8AD96;
+  background: rgba(212, 175, 55, .06);
+  font-size: 9px;
+  line-height: 1.6;
+}
+
+.employee-management-page .modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 9px;
+  padding-top: 5px;
+}
+
+/* Responsive */
+
+@media (max-width: 760px) {
+  .employee-management-page .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .employee-management-page .page-actions {
+    justify-content: flex-start;
+  }
+
+  .employee-management-page .stats-grid {
+    max-width: none;
+  }
+
+  .employee-management-page .content-card {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 520px) {
+  .employee-management-page .stats-grid {
+    grid-template-columns: 1fr;
+    gap: 9px;
+  }
+
+  .employee-management-page .stat-card {
+    min-height: 80px;
+    padding: 14px;
+  }
+
+  .employee-management-page .page-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .employee-management-page .page-actions .btn {
+    min-width: 0;
+    padding-inline: 10px;
+    font-size: 10px;
+  }
+
+  .employee-management-page .content-card {
+    padding: 13px;
+  }
+
+  .employee-management-page .modal-backdrop {
+    align-items: flex-end;
+    padding: 10px;
+  }
+
+  .employee-management-page .modal-card {
+    padding: 19px;
+  }
+
+  .employee-management-page .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .employee-management-page .modal-actions .btn {
+    width: 100%;
+  }
+}

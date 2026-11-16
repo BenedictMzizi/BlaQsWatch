@@ -26,7 +26,8 @@ import {
   BellIcon,
   MagnifyingGlassIcon,
   ArrowRightOnRectangleIcon,
-  BuildingOffice2Icon
+  BuildingOffice2Icon,
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
 
 import { supabase } from '../../lib/supabase';
@@ -244,6 +245,18 @@ export default function DashboardLayout() {
 
   const selectedRole = selectedBusiness?.role || null;
 
+  // Company Admins only: keep this separate from platform administration.
+  const visibleNav = [
+    ...nav,
+    ...(selectedRole === 'admin'
+      ? [{
+          label: 'Employee Management',
+          to: '/employees',
+          icon: UserGroupIcon
+        }]
+      : [])
+  ];
+
   function handleBusinessChange(event) {
     const businessId = event.target.value;
 
@@ -383,7 +396,7 @@ export default function DashboardLayout() {
           </div>
 
           <nav className="sidebar-navigation">
-            {nav.map(({ label, to, icon: Icon }) => (
+            {visibleNav.map(({ label, to, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}

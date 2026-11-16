@@ -21,23 +21,22 @@ import Settings from '../pages/Settings/Settings';
 import PartDetails from '../pages/PartDetails/PartDetails';
 
 import PlatformRoute from './PlatformRoute';
+import CompanyAdminRoute from './CompanyAdminRoute';
 import PlatformDashboard from '../pages/Platform/PlatformDashboard';
 import CompanyManagement from '../pages/Platform/CompanyManagement';
 import EmployeeManagement from '../pages/Platform/EmployeeManagement';
+import CompanyEmployeeManagement from '../pages/Company/EmployeeManagement';
 import ProtectedRoute from './ProtectedRoute';
 
 export default function AppRoutes() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* Public authentication routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/auth/callback" element={<AuthCallback />} />
         <Route path="/auth/reset-password" element={<PasswordReset />} />
 
-        {/* Protected application routes */}
         <Route element={<ProtectedRoute />}>
-          {/* Platform administration */}
           <Route path="/platform" element={<PlatformRoute />}>
             <Route element={<PlatformLayout />}>
               <Route index element={<PlatformDashboard />} />
@@ -46,7 +45,6 @@ export default function AppRoutes() {
             </Route>
           </Route>
 
-          {/* Company workspace */}
           <Route element={<DashboardLayout />}>
             <Route index element={<Dashboard />} />
             <Route path="parts" element={<Parts />} />
@@ -60,10 +58,13 @@ export default function AppRoutes() {
             <Route path="categories" element={<Categories />} />
             <Route path="reports" element={<Reports />} />
             <Route path="settings" element={<Settings />} />
+
+            <Route element={<CompanyAdminRoute />}>
+              <Route path="employees" element={<CompanyEmployeeManagement />} />
+            </Route>
           </Route>
         </Route>
 
-        {/* Unknown routes */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>

@@ -6,7 +6,6 @@ import {
   ArrowPathIcon,
   MagnifyingGlassIcon,
   BuildingOffice2Icon,
-  MapPinIcon,
   Squares2X2Icon,
   CheckCircleIcon,
   XCircleIcon,
@@ -54,6 +53,11 @@ const DEFAULT_LAYOUT = {
   bins: 2
 };
 
+const inputClass =
+  'w-full rounded-lg border border-[#38342B] bg-[#111214] px-3 py-2.5 text-sm text-[#F4F1E9] placeholder:text-[#777064] outline-none transition focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/15';
+
+const selectClass = `${inputClass} cursor-pointer`;
+
 function getErrorMessage(error) {
   if (error?.code === '42501') {
     return 'You do not have permission to manage this record. Business admin access is required.';
@@ -73,16 +77,13 @@ function getErrorMessage(error) {
 function Field({ label, children, required = false }) {
   return (
     <label className="block space-y-1.5">
-      <span className="text-sm font-medium text-slate-700">
+      <span className="text-sm font-medium text-[#D8D0BE]">
         {label}{required ? ' *' : ''}
       </span>
       {children}
     </label>
   );
 }
-
-const inputClass =
-  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100';
 
 function formatNumber(value) {
   return Number(value || 0).toLocaleString('en-ZA');
@@ -97,10 +98,7 @@ function nextSequence(items, parentId, parentField, valueField) {
   const highest = items
     .filter(item => item[parentField] === parentId)
     .reduce((max, item) => {
-      return Math.max(
-        max,
-        sequenceNumber(item[valueField])
-      );
+      return Math.max(max, sequenceNumber(item[valueField]));
     }, 0);
 
   return highest + 1;
@@ -917,7 +915,7 @@ export default function Warehouses() {
           <>
             <Field label="Branch" required>
               <select
-                className={inputClass}
+                className={selectClass}
                 value={form.branch_id}
                 onChange={e => updateField('branch_id', e.target.value)}
                 required
@@ -963,7 +961,7 @@ export default function Warehouses() {
           <>
             <Field label="Warehouse" required>
               <select
-                className={inputClass}
+                className={selectClass}
                 value={form.warehouse_id}
                 onChange={e => updateField('warehouse_id', e.target.value)}
                 required
@@ -985,7 +983,7 @@ export default function Warehouses() {
           <>
             <Field label="Warehouse" required>
               <select
-                className={inputClass}
+                className={selectClass}
                 value={form.warehouse_id}
                 onChange={e => updateField('warehouse_id', e.target.value)}
                 required
@@ -1001,7 +999,7 @@ export default function Warehouses() {
 
             <Field label="Aisle" required>
               <select
-                className={inputClass}
+                className={selectClass}
                 value={form.aisle_id}
                 onChange={e => updateField('aisle_id', e.target.value)}
                 required
@@ -1023,7 +1021,7 @@ export default function Warehouses() {
           <>
             <Field label="Warehouse" required>
               <select
-                className={inputClass}
+                className={selectClass}
                 value={form.warehouse_id}
                 onChange={e => updateField('warehouse_id', e.target.value)}
                 required
@@ -1039,7 +1037,7 @@ export default function Warehouses() {
 
             <Field label="Aisle" required>
               <select
-                className={inputClass}
+                className={selectClass}
                 value={form.aisle_id}
                 onChange={e => updateField('aisle_id', e.target.value)}
                 required
@@ -1055,7 +1053,7 @@ export default function Warehouses() {
 
             <Field label="Rack" required>
               <select
-                className={inputClass}
+                className={selectClass}
                 value={form.rack_id}
                 onChange={e => updateField('rack_id', e.target.value)}
                 required
@@ -1077,7 +1075,7 @@ export default function Warehouses() {
           <>
             <Field label="Warehouse" required>
               <select
-                className={inputClass}
+                className={selectClass}
                 value={form.warehouse_id}
                 onChange={e => updateField('warehouse_id', e.target.value)}
                 required
@@ -1093,7 +1091,7 @@ export default function Warehouses() {
 
             <Field label="Aisle" required>
               <select
-                className={inputClass}
+                className={selectClass}
                 value={form.aisle_id}
                 onChange={e => updateField('aisle_id', e.target.value)}
                 required
@@ -1109,7 +1107,7 @@ export default function Warehouses() {
 
             <Field label="Rack" required>
               <select
-                className={inputClass}
+                className={selectClass}
                 value={form.rack_id}
                 onChange={e => updateField('rack_id', e.target.value)}
                 required
@@ -1125,7 +1123,7 @@ export default function Warehouses() {
 
             <Field label="Shelf" required>
               <select
-                className={inputClass}
+                className={selectClass}
                 value={form.shelf_id}
                 onChange={e => updateField('shelf_id', e.target.value)}
                 required
@@ -1170,12 +1168,12 @@ export default function Warehouses() {
           </Field>
         )}
 
-        <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+        <label className="flex items-center gap-2 text-sm font-medium text-[#D8D0BE]">
           <input
             type="checkbox"
             checked={form.active !== false}
             onChange={e => updateField('active', e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300"
+            className="h-4 w-4 accent-[#D4AF37]"
           />
           Active
         </label>
@@ -1185,27 +1183,28 @@ export default function Warehouses() {
 
   return (
     <div className="space-y-6">
+      {/* Page heading */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="text-xs font-bold tracking-widest text-blue-600">
+          <p className="text-xs font-bold tracking-[0.2em] text-[#D4AF37]">
             STORAGE STRUCTURE
           </p>
 
-          <h1 className="mt-1 text-2xl font-bold text-slate-900">
+          <h1 className="mt-1 text-2xl font-bold text-[#F4F1E9]">
             Warehouses & locations
           </h1>
 
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-[#A39B8A]">
             Manage branches, warehouses and the physical locations where parts are stored.
           </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={loadData}
             disabled={loading}
-            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
+            className="inline-flex items-center gap-2 rounded-lg border border-[#494131] bg-[#191A1E] px-4 py-2.5 text-sm font-semibold text-[#E7DFCD] transition hover:border-[#D4AF37] hover:bg-[#202126] disabled:opacity-50"
           >
             <ArrowPathIcon className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
@@ -1215,7 +1214,7 @@ export default function Warehouses() {
             <button
               type="button"
               onClick={openCreate}
-              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+              className="inline-flex items-center gap-2 rounded-lg border border-[#D4AF37] bg-[#D4AF37] px-4 py-2.5 text-sm font-bold text-[#111214] transition hover:bg-[#F4D58B]"
             >
               <PlusIcon className="h-4 w-4" />
               Add {SECTIONS.find(item => item.key === section)?.label.replace(/s$/, '')}
@@ -1224,48 +1223,54 @@ export default function Warehouses() {
         </div>
       </div>
 
+      {/* Section overview */}
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
-        {SECTIONS.map(item => (
-          <button
-            key={item.key}
-            type="button"
-            onClick={() => {
-              setSection(item.key);
-              setSearch('');
-            }}
-            className={`rounded-xl border p-4 text-left transition ${
-              section === item.key
-                ? 'border-blue-500 bg-blue-50 ring-1 ring-blue-200'
-                : 'border-slate-200 bg-white hover:border-slate-300'
-            }`}
-          >
-            <p className="text-xs font-medium text-slate-500">
-              {item.label}
-            </p>
+        {SECTIONS.map(item => {
+          const selected = section === item.key;
 
-            <p className="mt-2 text-2xl font-bold text-slate-900">
-              {activeCounts[item.key] ?? 0}
-            </p>
+          return (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => {
+                setSection(item.key);
+                setSearch('');
+              }}
+              className={`rounded-xl border p-4 text-left transition ${
+                selected
+                  ? 'border-[#D4AF37] bg-[#292316] shadow-[0_0_0_1px_rgba(212,175,55,0.15)]'
+                  : 'border-[#302E29] bg-[#191A1E] hover:border-[#76602B] hover:bg-[#202126]'
+              }`}
+            >
+              <p className={`text-xs font-medium ${selected ? 'text-[#D4AF37]' : 'text-[#A39B8A]'}`}>
+                {item.label}
+              </p>
 
-            <p className="mt-1 text-xs text-slate-500">Active</p>
-          </button>
-        ))}
+              <p className="mt-2 text-2xl font-bold tabular-nums text-[#F4F1E9]">
+                {activeCounts[item.key] ?? 0}
+              </p>
+
+              <p className="mt-1 text-xs text-[#8F887B]">Active</p>
+            </button>
+          );
+        })}
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Records panel */}
+      <div className="overflow-hidden rounded-xl border border-[#302E29] bg-[#191A1E] shadow-lg shadow-black/10">
+        <div className="flex flex-col gap-3 border-b border-[#302E29] p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="font-semibold text-slate-900">
+            <h2 className="font-semibold text-[#F4F1E9]">
               {SECTIONS.find(item => item.key === section)?.label}
             </h2>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-[#A39B8A]">
               {currentRecords.length} records in this business
             </p>
           </div>
 
           <div className="relative w-full sm:max-w-xs">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+            <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-[#8F887B]" />
 
             <input
               type="search"
@@ -1278,20 +1283,20 @@ export default function Warehouses() {
         </div>
 
         {error && (
-          <div className="m-4 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+          <div className="m-4 rounded-lg border border-red-900/60 bg-red-950/30 p-4 text-sm text-red-300">
             {error}
           </div>
         )}
 
         {!loading && !error && filteredRecords.length === 0 && (
           <div className="px-6 py-16 text-center">
-            <BuildingOffice2Icon className="mx-auto h-12 w-12 text-slate-300" />
+            <BuildingOffice2Icon className="mx-auto h-12 w-12 text-[#6F685B]" />
 
-            <h3 className="mt-3 font-semibold text-slate-800">
+            <h3 className="mt-3 font-semibold text-[#E9E2D2]">
               No {SECTIONS.find(item => item.key === section)?.label.toLowerCase()} found
             </h3>
 
-            <p className="mt-1 text-sm text-slate-500">
+            <p className="mt-1 text-sm text-[#A39B8A]">
               {isAdmin
                 ? 'Add your first record to start building the storage hierarchy.'
                 : 'There are no records available for this business.'}
@@ -1300,46 +1305,46 @@ export default function Warehouses() {
         )}
 
         {loading ? (
-          <div className="flex items-center justify-center gap-2 py-16 text-sm text-slate-500">
-            <ArrowPathIcon className="h-5 w-5 animate-spin" />
+          <div className="flex items-center justify-center gap-2 py-16 text-sm text-[#A39B8A]">
+            <ArrowPathIcon className="h-5 w-5 animate-spin text-[#D4AF37]" />
             Loading warehouse structure...
           </div>
         ) : filteredRecords.length > 0 && (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50">
+            <table className="min-w-full divide-y divide-[#302E29]">
+              <thead className="bg-[#141518]">
                 <tr>
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#B5A987]">
                     Name / Position
                   </th>
 
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#B5A987]">
                     Code / Bin
                   </th>
 
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#B5A987]">
                     Parent
                   </th>
 
                   {section === 'locations' && (
-                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                    <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#B5A987]">
                       Units stored
                     </th>
                   )}
 
-                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase text-slate-500">
+                  <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[#B5A987]">
                     Status
                   </th>
 
                   {isAdmin && (
-                    <th className="px-5 py-3 text-right text-xs font-semibold uppercase text-slate-500">
+                    <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[#B5A987]">
                       Actions
                     </th>
                   )}
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[#302E29]">
                 {filteredRecords.map(record => {
                   const displayName = section === 'locations'
                     ? [
@@ -1351,38 +1356,41 @@ export default function Warehouses() {
                     : record.name;
 
                   return (
-                    <tr key={record.id} className="hover:bg-slate-50">
+                    <tr
+                      key={record.id}
+                      className="transition hover:bg-[#202126]"
+                    >
                       <td className="px-5 py-4">
-                        <div className="font-semibold text-sm text-slate-900">
+                        <div className="text-sm font-semibold text-[#F4F1E9]">
                           {displayName || record.description || '—'}
                         </div>
 
                         {record.description && section !== 'locations' && (
-                          <div className="mt-1 text-xs text-slate-500">
+                          <div className="mt-1 text-xs text-[#A39B8A]">
                             {record.description}
                           </div>
                         )}
                       </td>
 
-                      <td className="px-5 py-4 text-sm text-slate-600">
+                      <td className="px-5 py-4 text-sm text-[#C5BDAC]">
                         {record.code || record.bin || '—'}
                       </td>
 
-                      <td className="px-5 py-4 text-sm text-slate-600">
+                      <td className="px-5 py-4 text-sm text-[#C5BDAC]">
                         {getParentName(record)}
                       </td>
 
                       {section === 'locations' && (
-                        <td className="px-5 py-4 text-sm font-semibold text-slate-900">
+                        <td className="px-5 py-4 text-sm font-semibold tabular-nums text-[#F4F1E9]">
                           {formatNumber(countsByLocation[record.id] || 0)}
                         </td>
                       )}
 
                       <td className="px-5 py-4">
-                        <span className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
+                        <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${
                           record.active === false
-                            ? 'bg-slate-100 text-slate-600'
-                            : 'bg-green-100 text-green-700'
+                            ? 'border-[#49443A] bg-[#292A2E] text-[#AAA395]'
+                            : 'border-[#75602C] bg-[#302817] text-[#E7C96E]'
                         }`}>
                           {record.active === false ? 'Inactive' : 'Active'}
                         </span>
@@ -1396,7 +1404,7 @@ export default function Warehouses() {
                                 type="button"
                                 onClick={() => openLayoutWizard(record)}
                                 title="Build warehouse layout"
-                                className="rounded-lg border border-blue-200 bg-blue-50 p-2 text-blue-700 hover:bg-blue-100"
+                                className="rounded-lg border border-[#75602C] bg-[#292316] p-2 text-[#D4AF37] transition hover:border-[#D4AF37] hover:bg-[#382E18]"
                               >
                                 <Squares2X2Icon className="h-4 w-4" />
                               </button>
@@ -1406,7 +1414,7 @@ export default function Warehouses() {
                               type="button"
                               onClick={() => openEdit(record)}
                               title="Edit"
-                              className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100"
+                              className="rounded-lg border border-[#49443A] bg-[#202126] p-2 text-[#D8D0BE] transition hover:border-[#D4AF37] hover:text-[#D4AF37]"
                             >
                               <PencilSquareIcon className="h-4 w-4" />
                             </button>
@@ -1415,7 +1423,7 @@ export default function Warehouses() {
                               type="button"
                               onClick={() => toggleActive(record)}
                               title={record.active === false ? 'Activate' : 'Deactivate'}
-                              className="rounded-lg border border-slate-200 p-2 text-slate-600 hover:bg-slate-100"
+                              className="rounded-lg border border-[#49443A] bg-[#202126] p-2 text-[#D8D0BE] transition hover:border-[#D4AF37] hover:text-[#D4AF37]"
                             >
                               {record.active === false
                                 ? <CheckCircleIcon className="h-4 w-4" />
@@ -1432,30 +1440,30 @@ export default function Warehouses() {
           </div>
         )}
 
-        <div className="border-t border-slate-200 bg-slate-50 px-5 py-3 text-xs text-slate-500">
+        <div className="border-t border-[#302E29] bg-[#141518] px-5 py-3 text-xs text-[#A39B8A]">
           Showing {filteredRecords.length} of {currentRecords.length} records
         </div>
       </div>
 
       {!isAdmin && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        <div className="rounded-lg border border-[#75602C] bg-[#292316] p-4 text-sm text-[#E5D3A0]">
           You have read-only access to warehouse structures. Contact a business administrator to make changes.
         </div>
       )}
 
       {/* Manual create/edit modal */}
       {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/50 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-sm">
           <form
             onSubmit={handleSave}
-            className="my-8 w-full max-w-xl rounded-2xl bg-white shadow-xl"
+            className="my-8 w-full max-w-xl overflow-hidden rounded-2xl border border-[#494131] bg-[#191A1E] shadow-2xl shadow-black/40"
           >
-            <div className="border-b border-slate-200 px-6 py-5">
-              <p className="text-xs font-bold tracking-widest text-blue-600">
+            <div className="border-b border-[#302E29] px-6 py-5">
+              <p className="text-xs font-bold tracking-[0.2em] text-[#D4AF37]">
                 WAREHOUSE CONFIGURATION
               </p>
 
-              <h2 className="mt-1 text-xl font-bold text-slate-900">
+              <h2 className="mt-1 text-xl font-bold text-[#F4F1E9]">
                 {editing ? 'Edit' : 'Add'} {SECTIONS.find(item => item.key === section)?.label.replace(/s$/, '')}
               </h2>
             </div>
@@ -1464,12 +1472,12 @@ export default function Warehouses() {
               {renderFormFields()}
             </div>
 
-            <div className="flex justify-end gap-3 border-t border-slate-200 px-6 py-4">
+            <div className="flex justify-end gap-3 border-t border-[#302E29] px-6 py-4">
               <button
                 type="button"
                 onClick={() => setModalOpen(false)}
                 disabled={saving}
-                className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="rounded-lg border border-[#49443A] px-4 py-2.5 text-sm font-semibold text-[#D8D0BE] transition hover:border-[#D4AF37] hover:bg-[#202126]"
               >
                 Cancel
               </button>
@@ -1477,7 +1485,7 @@ export default function Warehouses() {
               <button
                 type="submit"
                 disabled={saving}
-                className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                className="rounded-lg border border-[#D4AF37] bg-[#D4AF37] px-5 py-2.5 text-sm font-bold text-[#111214] transition hover:bg-[#F4D58B] disabled:opacity-50"
               >
                 {saving ? 'Saving...' : editing ? 'Save changes' : 'Create record'}
               </button>
@@ -1488,22 +1496,22 @@ export default function Warehouses() {
 
       {/* Automated warehouse layout builder */}
       {layoutModalOpen && layoutWarehouse && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/60 p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/75 p-4 backdrop-blur-sm">
           <form
             onSubmit={createWarehouseLayout}
-            className="my-8 w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className="my-8 w-full max-w-2xl overflow-hidden rounded-2xl border border-[#494131] bg-[#191A1E] shadow-2xl shadow-black/40"
           >
-            <div className="flex items-start justify-between border-b border-slate-200 px-6 py-5">
+            <div className="flex items-start justify-between border-b border-[#302E29] px-6 py-5">
               <div>
-                <p className="text-xs font-bold tracking-widest text-blue-600">
+                <p className="text-xs font-bold tracking-[0.2em] text-[#D4AF37]">
                   AUTOMATED STORAGE SETUP
                 </p>
 
-                <h2 className="mt-1 text-xl font-bold text-slate-900">
+                <h2 className="mt-1 text-xl font-bold text-[#F4F1E9]">
                   Build warehouse layout
                 </h2>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="mt-1 text-sm text-[#A39B8A]">
                   {layoutWarehouse.name}
                   {layoutWarehouse.code ? ` · ${layoutWarehouse.code}` : ''}
                 </p>
@@ -1513,23 +1521,23 @@ export default function Warehouses() {
                 type="button"
                 onClick={() => setLayoutModalOpen(false)}
                 disabled={layoutSaving}
-                className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
+                className="rounded-lg p-2 text-[#A39B8A] transition hover:bg-[#292A2E] hover:text-[#D4AF37]"
               >
                 <XMarkIcon className="h-5 w-5" />
               </button>
             </div>
 
             <div className="space-y-6 p-6">
-              <div className="rounded-lg border border-blue-100 bg-blue-50 p-4">
+              <div className="rounded-lg border border-[#75602C] bg-[#292316] p-4">
                 <div className="flex items-start gap-3">
-                  <BuildingOffice2Icon className="mt-0.5 h-5 w-5 shrink-0 text-blue-600" />
+                  <BuildingOffice2Icon className="mt-0.5 h-5 w-5 shrink-0 text-[#D4AF37]" />
 
                   <div>
-                    <p className="text-sm font-semibold text-blue-900">
+                    <p className="text-sm font-semibold text-[#F0D995]">
                       Configure your physical warehouse
                     </p>
 
-                    <p className="mt-1 text-xs leading-5 text-blue-800">
+                    <p className="mt-1 text-xs leading-5 text-[#C8B98E]">
                       Enter how many new storage sections you want to create.
                       Existing aisles and their contents will not be deleted or replaced.
                     </p>
@@ -1567,13 +1575,13 @@ export default function Warehouses() {
                 />
               </div>
 
-              <div className="rounded-xl border border-slate-200 p-4">
+              <div className="rounded-xl border border-[#38342B] bg-[#141518] p-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-slate-900">
+                  <h3 className="font-semibold text-[#F4F1E9]">
                     Layout preview
                   </h3>
 
-                  <span className="text-xs text-slate-500">
+                  <span className="text-xs text-[#A39B8A]">
                     New records
                   </span>
                 </div>
@@ -1585,26 +1593,26 @@ export default function Warehouses() {
                   <PreviewCount label="Bins" value={previewTotal} />
                 </div>
 
-                <div className="mt-4 flex items-center justify-between rounded-lg bg-slate-50 p-3">
+                <div className="mt-4 flex items-center justify-between rounded-lg border border-[#75602C] bg-[#292316] p-3">
                   <div className="flex items-center gap-2">
-                    <CubeIcon className="h-5 w-5 text-blue-600" />
-                    <span className="text-sm font-medium text-slate-700">
+                    <CubeIcon className="h-5 w-5 text-[#D4AF37]" />
+                    <span className="text-sm font-medium text-[#E7DFCD]">
                       Total storage positions
                     </span>
                   </div>
 
-                  <span className="text-xl font-bold text-slate-900">
+                  <span className="text-xl font-bold tabular-nums text-[#F4D58B]">
                     {formatNumber(previewTotal)}
                   </span>
                 </div>
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-slate-900">
+                <h3 className="text-sm font-semibold text-[#F4F1E9]">
                   Example location codes
                 </h3>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-[#A39B8A]">
                   Each bin receives a code based on its aisle, rack and shelf.
                 </p>
 
@@ -1612,7 +1620,7 @@ export default function Warehouses() {
                   {['A01 / R01 / S01 / B01', 'A01 / R01 / S01 / B02', 'A01 / R01 / S02 / B01'].map(code => (
                     <span
                       key={code}
-                      className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1.5 font-mono text-xs text-slate-700"
+                      className="rounded-md border border-[#49443A] bg-[#111214] px-2.5 py-1.5 font-mono text-xs text-[#D8D0BE]"
                     >
                       {code}
                     </span>
@@ -1620,19 +1628,19 @@ export default function Warehouses() {
                 </div>
               </div>
 
-              <p className="text-xs leading-5 text-slate-500">
+              <p className="text-xs leading-5 text-[#A39B8A]">
                 Each bin is created as an individual storage location. The system
                 saves the aisle, rack and shelf relationships so products can
                 later be assigned to their exact positions.
               </p>
             </div>
 
-            <div className="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col-reverse gap-3 border-t border-[#302E29] bg-[#141518] px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
               <button
                 type="button"
                 onClick={() => setLayoutModalOpen(false)}
                 disabled={layoutSaving}
-                className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="rounded-lg border border-[#49443A] bg-[#191A1E] px-4 py-2.5 text-sm font-semibold text-[#D8D0BE] transition hover:border-[#D4AF37]"
               >
                 Cancel
               </button>
@@ -1644,7 +1652,7 @@ export default function Warehouses() {
                   !previewTotal ||
                   previewTotal > 5000
                 }
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-[#D4AF37] bg-[#D4AF37] px-5 py-2.5 text-sm font-bold text-[#111214] transition hover:bg-[#F4D58B] disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {layoutSaving ? (
                   <>
@@ -1712,16 +1720,16 @@ function LayoutNumberField({ label, value, onChange, description }) {
         required
       />
 
-      <p className="text-xs text-slate-500">{description}</p>
+      <p className="text-xs text-[#A39B8A]">{description}</p>
     </Field>
   );
 }
 
 function PreviewCount({ label, value }) {
   return (
-    <div className="rounded-lg bg-slate-50 p-3">
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="mt-1 text-xl font-bold text-slate-900">
+    <div className="rounded-lg border border-[#38342B] bg-[#191A1E] p-3">
+      <p className="text-xs text-[#A39B8A]">{label}</p>
+      <p className="mt-1 text-xl font-bold tabular-nums text-[#F4F1E9]">
         {formatNumber(value)}
       </p>
     </div>

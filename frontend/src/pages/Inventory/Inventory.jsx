@@ -35,6 +35,68 @@ function productImageUrl(image) {
   return image?.imageUrl || image?.image_url || '';
 }
 
+const imagePlaceholderStyle = {
+  width: '42px',
+  height: '42px',
+  minWidth: '42px',
+  borderRadius: '8px',
+  overflow: 'hidden',
+  display: 'grid',
+  placeItems: 'center',
+  background: 'var(--bw-panel-hover)',
+  color: 'var(--bw-gold-light)',
+  border: '1px solid var(--bw-gold-dark)',
+  fontWeight: 700,
+};
+
+const productImageStyle = {
+  width: '100%',
+  height: '100%',
+  objectFit: 'cover',
+};
+
+const dropdownStyle = {
+  position: 'absolute',
+  zIndex: 30,
+  top: '100%',
+  left: 0,
+  right: 0,
+  maxHeight: '220px',
+  overflowY: 'auto',
+  background: 'var(--bw-panel)',
+  border: '1px solid var(--bw-gold-dark)',
+  borderRadius: '8px',
+  boxShadow: '0 12px 28px rgba(0,0,0,0.45)',
+};
+
+const dropdownButtonStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: '10px',
+  width: '100%',
+  padding: '10px 12px',
+  textAlign: 'left',
+  border: 0,
+  borderBottom: '1px solid rgba(212,175,55,0.15)',
+  background: 'transparent',
+  color: 'var(--bw-white)',
+  cursor: 'pointer',
+};
+
+const dropdownImageStyle = {
+  width: '36px',
+  height: '36px',
+  minWidth: '36px',
+  borderRadius: '6px',
+  overflow: 'hidden',
+  display: 'grid',
+  placeItems: 'center',
+  background: 'var(--bw-panel-hover)',
+  color: 'var(--bw-gold-light)',
+  border: '1px solid rgba(212,175,55,0.3)',
+  fontWeight: 700,
+};
+
 export default function Inventory() {
   const data = useInventoryData();
   const [params, setParams] = useSearchParams();
@@ -600,29 +662,12 @@ export default function Inventory() {
                             gap: '10px',
                           }}
                         >
-                          <div
-                            style={{
-                              width: '42px',
-                              height: '42px',
-                              minWidth: '42px',
-                              borderRadius: '8px',
-                              overflow: 'hidden',
-                              display: 'grid',
-                              placeItems: 'center',
-                              background: '#f1f5f9',
-                              color: '#64748b',
-                              fontWeight: 700,
-                            }}
-                          >
+                          <div style={imagePlaceholderStyle}>
                             {product.primaryImage ? (
                               <img
                                 src={productImageUrl(product.primaryImage)}
                                 alt={product.name}
-                                style={{
-                                  width: '100%',
-                                  height: '100%',
-                                  objectFit: 'cover',
-                                }}
+                                style={productImageStyle}
                               />
                             ) : (
                               product.name.slice(0, 1)
@@ -826,8 +871,11 @@ export default function Inventory() {
                       right: '10px',
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      border: 0,
-                      background: 'transparent',
+                      border: '1px solid var(--bw-gold-dark)',
+                      borderRadius: '5px',
+                      padding: '5px 9px',
+                      background: 'var(--bw-panel-hover)',
+                      color: 'var(--bw-gold-light)',
                       cursor: 'pointer',
                       fontSize: '12px',
                     }}
@@ -837,60 +885,27 @@ export default function Inventory() {
                 )}
 
                 {showProductResults && !productId && !createNewProduct && (
-                  <div
-                    style={{
-                      position: 'absolute',
-                      zIndex: 30,
-                      top: '100%',
-                      left: 0,
-                      right: 0,
-                      maxHeight: '220px',
-                      overflowY: 'auto',
-                      background: '#fff',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      boxShadow: '0 8px 20px rgba(0,0,0,0.12)',
-                    }}
-                  >
+                  <div style={dropdownStyle}>
                     {matchingProducts.map(product => (
                       <button
                         key={product.id}
                         type="button"
                         onClick={() => selectProduct(product)}
-                        style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '10px',
-                          width: '100%',
-                          padding: '10px 12px',
-                          textAlign: 'left',
-                          border: 0,
-                          borderBottom: '1px solid #eee',
-                          background: '#fff',
-                          cursor: 'pointer',
+                        style={dropdownButtonStyle}
+                        onMouseEnter={e => {
+                          e.currentTarget.style.background =
+                            'var(--bw-panel-hover)';
+                        }}
+                        onMouseLeave={e => {
+                          e.currentTarget.style.background = 'transparent';
                         }}
                       >
-                        <span
-                          style={{
-                            width: '36px',
-                            height: '36px',
-                            minWidth: '36px',
-                            borderRadius: '6px',
-                            overflow: 'hidden',
-                            display: 'grid',
-                            placeItems: 'center',
-                            background: '#f1f5f9',
-                          }}
-                        >
+                        <span style={dropdownImageStyle}>
                           {product.primaryImage ? (
                             <img
                               src={productImageUrl(product.primaryImage)}
                               alt=""
-                              style={{
-                                width: '100%',
-                                height: '100%',
-                                objectFit: 'cover',
-                              }}
+                              style={productImageStyle}
                             />
                           ) : (
                             product.name.slice(0, 1)
@@ -899,7 +914,13 @@ export default function Inventory() {
 
                         <span>
                           <strong>{product.name}</strong>
-                          <small style={{ display: 'block', color: '#64748b' }}>
+                          <small
+                            style={{
+                              display: 'block',
+                              color: 'var(--bw-muted)',
+                              marginTop: '3px',
+                            }}
+                          >
                             {product.sku || 'No SKU'} · {product.quantity} units on hand
                           </small>
                         </span>
@@ -907,7 +928,13 @@ export default function Inventory() {
                     ))}
 
                     {matchingProducts.length === 0 && (
-                      <p style={{ padding: '12px', margin: 0, color: '#64748b' }}>
+                      <p
+                        style={{
+                          padding: '12px',
+                          margin: 0,
+                          color: 'var(--bw-muted)',
+                        }}
+                      >
                         No matching products found.
                       </p>
                     )}
@@ -933,8 +960,9 @@ export default function Inventory() {
                           padding: '12px',
                           textAlign: 'left',
                           border: 0,
-                          background: '#f8fafc',
-                          color: '#1d4ed8',
+                          borderTop: '1px solid var(--bw-gold-dark)',
+                          background: 'var(--bw-panel-hover)',
+                          color: 'var(--bw-gold-light)',
                           cursor: 'pointer',
                           fontWeight: 600,
                         }}
@@ -959,14 +987,22 @@ export default function Inventory() {
                 style={{
                   padding: '16px',
                   margin: '12px 0',
-                  border: '1px solid #cbd5e1',
+                  border: '1px solid var(--bw-gold-dark)',
                   borderRadius: '10px',
-                  background: '#f8fafc',
+                  background: 'var(--bw-panel)',
+                  boxShadow: 'inset 0 0 0 1px rgba(212,175,55,0.06)',
                 }}
               >
                 <div style={{ marginBottom: '14px' }}>
                   <p className="eyebrow">NEW CATALOGUE ITEM</p>
-                  <h3 style={{ margin: '4px 0' }}>Create product</h3>
+                  <h3
+                    style={{
+                      margin: '4px 0',
+                      color: 'var(--bw-gold-light)',
+                    }}
+                  >
+                    Create product
+                  </h3>
                   <p className="muted">
                     Add the product details and images first. You will then complete the stock receipt.
                   </p>
@@ -1010,7 +1046,10 @@ export default function Inventory() {
                     ))}
                   </datalist>
 
-                  <small className="muted" style={{ display: 'block', marginTop: '5px' }}>
+                  <small
+                    className="muted"
+                    style={{ display: 'block', marginTop: '5px' }}
+                  >
                     Select an existing category or type a new one. New categories are saved when you create the product.
                   </small>
                 </label>
@@ -1036,7 +1075,7 @@ export default function Inventory() {
                 <div
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
+                    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
                     gap: '12px',
                   }}
                 >
@@ -1093,7 +1132,16 @@ export default function Inventory() {
                   />
                 </label>
 
-                <div className="form-section-title">PRODUCT IMAGES</div>
+                <div
+                  className="form-section-title"
+                  style={{
+                    color: 'var(--bw-gold-light)',
+                    borderBottom: '1px solid rgba(212,175,55,0.25)',
+                    paddingBottom: '8px',
+                  }}
+                >
+                  PRODUCT IMAGES
+                </div>
 
                 <p className="muted">
                   Add up to four images. JPG, PNG or WebP, maximum 5 MB each.
@@ -1118,6 +1166,7 @@ export default function Inventory() {
                             height: '85px',
                             objectFit: 'cover',
                             borderRadius: '8px',
+                            border: '1px solid var(--bw-gold-dark)',
                           }}
                         />
 
@@ -1129,11 +1178,15 @@ export default function Inventory() {
                             position: 'absolute',
                             top: '4px',
                             right: '4px',
-                            border: 0,
+                            border: '1px solid var(--bw-gold-dark)',
                             borderRadius: '50%',
-                            width: '24px',
-                            height: '24px',
-                            background: '#fff',
+                            width: '26px',
+                            height: '26px',
+                            display: 'grid',
+                            placeItems: 'center',
+                            padding: 0,
+                            background: 'var(--bw-charcoal)',
+                            color: 'var(--bw-gold-light)',
                             cursor: 'pointer',
                           }}
                         >

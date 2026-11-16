@@ -25,14 +25,14 @@ function StatusBadge({ status }) {
   const normalized = String(status || 'UNKNOWN').toUpperCase();
 
   const styles = {
-    IN_STOCK: 'bg-green-100 text-green-700',
-    LOW_STOCK: 'bg-amber-100 text-amber-700',
-    OUT_OF_STOCK: 'bg-red-100 text-red-700',
-    UNKNOWN: 'bg-slate-100 text-slate-600',
+    IN_STOCK: 'healthy',
+    LOW_STOCK: 'low',
+    OUT_OF_STOCK: 'out',
+    UNKNOWN: '',
   };
 
   return (
-    <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${styles[normalized] || styles.UNKNOWN}`}>
+    <span className={`stock-pill ${styles[normalized] || ''}`}>
       {normalized.replace(/_/g, ' ')}
     </span>
   );
@@ -52,6 +52,7 @@ export default function Inventory() {
       setInventory([]);
       setError('No business is currently selected.');
       setLoading(false);
+      setRefreshing(false);
       return;
     }
 
@@ -135,108 +136,163 @@ export default function Inventory() {
   }), [inventory]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div>
+      <div className="page-heading">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Inventory</h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="eyebrow">INVENTORY MANAGEMENT</p>
+          <h1>Inventory</h1>
+          <p className="muted">
             Live stock overview for your selected business.
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={() => loadInventory(true)}
-          disabled={loading || refreshing}
-          className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-50"
-        >
-          <ArrowPathIcon className={`h-5 w-5 ${refreshing ? 'animate-spin' : ''}`} />
-          Refresh
-        </button>
+        <div className="heading-actions">
+          <button
+            type="button"
+            onClick={() => loadInventory(true)}
+            disabled={loading || refreshing}
+            className="btn btn-secondary"
+          >
+            <ArrowPathIcon
+              style={{
+                width: 18,
+                height: 18,
+                animation: refreshing ? 'spin 1s linear infinite' : 'none',
+              }}
+            />
+            {refreshing ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Parts</p>
-          <p className="mt-2 text-3xl font-bold text-slate-900">
+      <div className="stats-grid">
+        <div className="stat-card">
+          <div className="stat-label">Parts</div>
+          <div className="stat-value">
             {loading ? '—' : formatNumber(totals.parts)}
-          </p>
+          </div>
+          <div className="stat-detail">Registered catalogue parts</div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Total quantity</p>
-          <p className="mt-2 text-3xl font-bold text-slate-900">
+        <div className="stat-card">
+          <div className="stat-label">Total quantity</div>
+          <div className="stat-value">
             {loading ? '—' : formatNumber(totals.quantity)}
-          </p>
+          </div>
+          <div className="stat-detail">Units across all locations</div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Low-stock parts</p>
-          <p className="mt-2 text-3xl font-bold text-amber-600">
+        <div className="stat-card">
+          <div className="stat-label">Low-stock parts</div>
+          <div className="stat-value" style={{ color: 'var(--bw-gold-light)' }}>
             {loading ? '—' : formatNumber(totals.lowStock)}
-          </p>
+          </div>
+          <div className="stat-detail">Parts requiring attention</div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Out-of-stock parts</p>
-          <p className="mt-2 text-3xl font-bold text-red-600">
+        <div className="stat-card">
+          <div className="stat-label">Out-of-stock parts</div>
+          <div className="stat-value" style={{ color: '#e58b83' }}>
             {loading ? '—' : formatNumber(totals.outOfStock)}
-          </p>
+          </div>
+          <div className="stat-detail">Parts with zero quantity</div>
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-        <div className="flex flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="panel list-panel">
+        <div className="panel-heading">
           <div>
-            <h2 className="font-semibold text-slate-900">Stock records</h2>
-            <p className="mt-1 text-sm text-slate-500">
+            <h2>Stock records</h2>
+            <p className="muted">
               Retrieved directly from StockWise.
             </p>
           </div>
 
-          <div className="relative w-full sm:max-w-xs">
-            <MagnifyingGlassIcon className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+          <div className="search-field" style={{ width: '100%', maxWidth: '360px' }}>
+            <MagnifyingGlassIcon />
             <input
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder="Search part number, OEM or barcode..."
-              className="w-full rounded-lg border border-slate-300 py-2.5 pl-10 pr-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
             />
           </div>
         </div>
 
         {error && (
-          <div className="m-4 flex gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700">
-            <ExclamationTriangleIcon className="h-5 w-5 shrink-0" />
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: '12px',
+              margin: '16px',
+              padding: '15px',
+              borderRadius: '9px',
+              border: '1px solid rgba(210, 100, 90, 0.4)',
+              background: 'rgba(150, 45, 40, 0.12)',
+              color: '#e58b83',
+              fontSize: '13px',
+            }}
+          >
+            <ExclamationTriangleIcon
+              style={{ width: 21, height: 21, flexShrink: 0 }}
+            />
             <div>
-              <p className="font-semibold">Inventory could not be loaded</p>
-              <p className="mt-1">{error}</p>
+              <strong>Inventory could not be loaded</strong>
+              <p style={{ marginTop: '5px' }}>{error}</p>
             </div>
           </div>
         )}
 
         {loading ? (
-          <div className="flex flex-col items-center py-16">
-            <ArrowPathIcon className="h-8 w-8 animate-spin text-blue-600" />
-            <p className="mt-3 text-sm text-slate-500">Loading live inventory...</p>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              padding: '64px 20px',
+              gap: '12px',
+            }}
+          >
+            <ArrowPathIcon
+              style={{
+                width: 32,
+                height: 32,
+                color: 'var(--bw-gold)',
+                animation: 'spin 1s linear infinite',
+              }}
+            />
+            <p className="muted">Loading live inventory...</p>
           </div>
         ) : !error && filteredInventory.length === 0 ? (
-          <div className="px-6 py-16 text-center">
-            <CubeIcon className="mx-auto h-12 w-12 text-slate-300" />
-            <h3 className="mt-4 font-semibold text-slate-800">
+          <div
+            style={{
+              padding: '64px 20px',
+              textAlign: 'center',
+            }}
+          >
+            <CubeIcon
+              style={{
+                width: 48,
+                height: 48,
+                margin: '0 auto',
+                color: 'var(--bw-gold-dark)',
+              }}
+            />
+            <h3 style={{ marginTop: '16px', color: 'var(--bw-white)' }}>
               {search ? 'No matching parts found' : 'No inventory records found'}
             </h3>
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="muted" style={{ marginTop: '8px' }}>
               {search
                 ? 'Try another search term.'
                 : 'There are currently no inventory records for this business.'}
             </p>
           </div>
         ) : !error && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-slate-200">
-              <thead className="bg-slate-50">
+          <div className="table-wrap">
+            <table>
+              <thead>
                 <tr>
                   {[
                     'Part number',
@@ -249,44 +305,49 @@ export default function Inventory() {
                     'Inventory cost',
                     'Inventory retail',
                   ].map((heading) => (
-                    <th
-                      key={heading}
-                      className="whitespace-nowrap px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider text-slate-500"
-                    >
+                    <th key={heading}>
                       {heading}
                     </th>
                   ))}
                 </tr>
               </thead>
 
-              <tbody className="divide-y divide-slate-100">
+              <tbody>
                 {filteredInventory.map((item) => (
-                  <tr key={item.part_id} className="hover:bg-slate-50">
-                    <td className="whitespace-nowrap px-5 py-4 text-sm font-semibold text-slate-900">
+                  <tr key={item.part_id}>
+                    <td style={{ fontWeight: 700, color: 'var(--bw-gold-light)' }}>
                       {item.part_number || '—'}
                     </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-600">
+
+                    <td>
                       {item.oem_number || '—'}
                     </td>
-                    <td className="min-w-56 px-5 py-4 text-sm text-slate-700">
+
+                    <td style={{ minWidth: '220px' }}>
                       {item.description || '—'}
                     </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-sm font-semibold text-slate-900">
+
+                    <td className="qty-cell">
                       {formatNumber(item.total_quantity)}
                     </td>
-                    <td className="px-5 py-4 text-sm text-slate-700">
+
+                    <td>
                       {formatNumber(item.location_count)}
                     </td>
-                    <td className="px-5 py-4 text-sm text-slate-700">
+
+                    <td>
                       {formatNumber(item.product_minimum_stock)}
                     </td>
-                    <td className="whitespace-nowrap px-5 py-4">
+
+                    <td>
                       <StatusBadge status={item.stock_status} />
                     </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-700">
+
+                    <td className="price-cell">
                       {formatCurrency(item.inventory_cost)}
                     </td>
-                    <td className="whitespace-nowrap px-5 py-4 text-sm text-slate-700">
+
+                    <td className="price-cell">
                       {formatCurrency(item.inventory_retail)}
                     </td>
                   </tr>
@@ -297,8 +358,12 @@ export default function Inventory() {
         )}
 
         {!loading && !error && filteredInventory.length > 0 && (
-          <div className="border-t border-slate-200 bg-slate-50 px-5 py-3 text-xs text-slate-500">
-            Showing {filteredInventory.length} of {inventory.length} parts
+          <div className="panel-foot">
+            Showing {formatNumber(filteredInventory.length)} of{' '}
+            {formatNumber(inventory.length)} parts
+            <span>
+              {formatNumber(totals.quantity)} units in stock
+            </span>
           </div>
         )}
       </div>
