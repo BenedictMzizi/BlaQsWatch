@@ -2,7 +2,8 @@
 import {
   NavLink,
   Outlet,
-  useNavigate
+  useNavigate,
+  useLocation
 } from 'react-router-dom';
 
 import {
@@ -29,11 +30,11 @@ import {
   BuildingOffice2Icon,
   UserGroupIcon,
   CreditCardIcon,
-  ChatBubbleLeftRightIcon
+  ChatBubbleLeftRightIcon,
+  RectangleStackIcon
 } from '@heroicons/react/24/outline';
 
 import { supabase } from '../../lib/supabase';
-import { InventoryProvider } from '../../context/InventoryContext';
 
 const WorkspaceContext = createContext(null);
 
@@ -51,20 +52,29 @@ export function useWorkspace() {
   return context;
 }
 
-const nav = [
-  { label: 'Overview', to: '/', icon: HomeIcon },
+const automotiveNav = [
+  { label: 'Overview', to: '/automotive', icon: HomeIcon },
   { label: 'Products', to: '/parts', icon: CubeIcon },
-  { label: 'Inventory overview', to: '/inventory', icon: CubeIcon },
+  { label: 'Inventory overview', to: '/inventory', icon: RectangleStackIcon },
   { label: 'Stock control', to: '/stock-control', icon: ArrowsRightLeftIcon },
   { label: 'Warehouses & locations', to: '/warehouses', icon: BuildingOffice2Icon },
   { label: 'Categories', to: '/categories', icon: TagIcon },
   { label: 'Suppliers', to: '/suppliers', icon: BuildingStorefrontIcon },
   { label: 'Manufacturers', to: '/manufacturers', icon: WrenchScrewdriverIcon },
   { label: 'Vehicle fitment', to: '/vehicles', icon: TruckIcon },
-  { label: 'Reports', to: '/reports', icon: ChartBarIcon },
+  { label: 'Reports', to: '/reports', icon: ChartBarIcon }
+];
 
-  // Company communication
-  { label: 'Messages', to: '/messages', icon: ChatBubbleLeftRightIcon }
+const foodNav = [
+  { label: 'Dashboard', to: '/food/dashboard', icon: HomeIcon },
+  { label: 'Point of sale', to: '/food/pos', icon: CreditCardIcon },
+  { label: 'Orders', to: '/food/orders', icon: CubeIcon },
+  { label: 'Kitchen', to: '/food/kitchen', icon: BuildingStorefrontIcon },
+  { label: 'Menu', to: '/food/menu', icon: RectangleStackIcon },
+  { label: 'Tables', to: '/food/tables', icon: BuildingOffice2Icon },
+  { label: 'Ingredients', to: '/food/ingredients', icon: TagIcon },
+  { label: 'Recipes', to: '/food/recipes', icon: WrenchScrewdriverIcon },
+  { label: 'Reports', to: '/food/reports', icon: ChartBarIcon }
 ];
 
 export default function DashboardLayout() {
@@ -83,6 +93,7 @@ export default function DashboardLayout() {
   const [logoutError, setLogoutError] = useState('');
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
     let mounted = true;
@@ -177,22 +188,40 @@ export default function DashboardLayout() {
 
         if (businessError) throw businessError;
 
-        const activeBusinesses = (businessData || []).map(business => {
-          const membership = membershipData.find(
-            item => item.business_id === business.id
-          );
-
-          return {
-            ...business,
-            role: membership?.role || 'staff'
-          };
-        });
-
-        if (activeBusinesses.length === 0) {
+        if (!businessData?.length) {
           throw new Error(
             'No active businesses are available to your account.'
           );
         }
+
+        // The enabled industries table is the source of truth.
+        // Do not use businesses.industry for workspace selection.
+        const {
+          data: industryData,
+          error: industryError
+        } = await supabase
+          .from('business_industries')
+          .select('business_id, industry_key')
+          .in('business_id', businessData.map(item => item.id))
+          .eq('active', true);
+
+        if (industryError) throw industryError;
+
+        const activeBusinesses = businessData.map(business => {
+          const membership = membershipData.find(
+            item => item.business_id === business.id
+          );
+
+          const industries = (industryData || [])
+            .filter(item => item.business_id === business.id)
+            .map(item => item.industry_key);
+
+          return {
+            ...business,
+            role: membership?.role || 'staff',
+            industries
+          };
+        });
 
         if (!mounted) return;
 
@@ -249,10 +278,39 @@ export default function DashboardLayout() {
     ) || null;
 
   const selectedRole = selectedBusiness?.role || null;
+  const enabledWorkspaces = selectedBusiness?.industries || [];
 
-  // Company Admins only: keep this separate from platform administration.
-  const visibleNav = [
-    ...nav,
+  const isFoodWorkspace = location.pathname.startsWith('/food');
+  const isAutomotiveWorkspace =
+    location.pathname === '/automotive' ||
+    (
+      !isFoodWorkspace &&
+      [
+        '/parts',
+        '/inventory',
+        '/stock-control',
+        '/warehouses',
+        '/vehicles',
+        '/manufacturers',
+        '/suppliers',
+        '/categories',
+        '/reports',
+        '/settings'
+      ].some(path =>
+        location.pathname === path ||
+        location.pathname.startsWith(`${path}/`)
+      )
+    );
+
+  const industryNav = isFoodWorkspace
+    ? foodNav
+    : isAutomotiveWorkspace
+      ? automotiveNav
+      : [];
+
+  // Company-level navigation is shared by all workspaces.
+  const companyNav = [
+    { label: 'Messages', to: '/messages', icon: ChatBubbleLeftRightIcon },
 
     ...(selectedRole === 'admin'
       ? [
@@ -285,6 +343,10 @@ export default function DashboardLayout() {
       SELECTED_BUSINESS_KEY,
       businessId
     );
+
+    // Re-evaluate enabled workspaces for the newly selected business.
+    navigate('/', { replace: true });
+    setOpen(false);
   }
 
   const displayName =
@@ -325,10 +387,16 @@ export default function DashboardLayout() {
     selectedBusiness,
     selectedBusinessId,
     role: selectedRole,
+    enabledWorkspaces,
     loading: workspaceLoading,
     error: workspaceError,
-    changeBusiness: handleBusinessChange
+    changeBusiness: handleBusinessChange,
+
+    isWorkspaceEnabled: industryKey =>
+      enabledWorkspaces.includes(industryKey)
   };
+
+  const showAutomotiveSearch = isAutomotiveWorkspace;
 
   return (
     <WorkspaceContext.Provider value={workspace}>
@@ -344,11 +412,8 @@ export default function DashboardLayout() {
             />
 
             <span className="sidebar-brand-text">
-              <span className="brand-name">
-                BlaQsWatch
-              </span>
-
-              <small>INVENTORY</small>
+              <span className="brand-name">BlaQsWatch</span>
+              <small>BUSINESS MANAGEMENT</small>
               <small className="brand-tagline">
                 Nothing Goes Unnoticed.
               </small>
@@ -363,9 +428,9 @@ export default function DashboardLayout() {
             </button>
           </div>
 
-          {/* Workspace */}
+          {/* Business selector */}
           <div className="workspace-label">
-            BUSINESS WORKSPACE
+            BUSINESS
           </div>
 
           {workspaceLoading ? (
@@ -403,17 +468,63 @@ export default function DashboardLayout() {
             </div>
           )}
 
-          {/* Main Navigation */}
+          {/* Workspace switcher */}
+          {!workspaceLoading && selectedBusiness && (
+            <>
+              <div className="sidebar-section-label">
+                WORKSPACES
+              </div>
+
+              <NavLink
+                to="/"
+                end
+                onClick={() => setOpen(false)}
+                className={({ isActive }) =>
+                  `nav-link ${isActive ? 'active' : ''}`
+                }
+              >
+                <RectangleStackIcon />
+                <span>Switch workspace</span>
+              </NavLink>
+            </>
+          )}
+
+          {/* Industry navigation */}
+          {industryNav.length > 0 && (
+            <>
+              <div className="sidebar-section-label">
+                {isFoodWorkspace ? 'FOOD & BEVERAGE' : 'AUTOMOTIVE'}
+              </div>
+
+              <nav className="sidebar-navigation">
+                {industryNav.map(({ label, to, icon: Icon }) => (
+                  <NavLink
+                    key={to}
+                    to={to}
+                    end={to === '/automotive' || to === '/food/dashboard'}
+                    onClick={() => setOpen(false)}
+                    className={({ isActive }) =>
+                      `nav-link ${isActive ? 'active' : ''}`
+                    }
+                  >
+                    <Icon />
+                    <span>{label}</span>
+                  </NavLink>
+                ))}
+              </nav>
+            </>
+          )}
+
+          {/* Shared company navigation */}
           <div className="sidebar-section-label">
-            MANAGEMENT
+            COMPANY
           </div>
 
           <nav className="sidebar-navigation">
-            {visibleNav.map(({ label, to, icon: Icon }) => (
+            {companyNav.map(({ label, to, icon: Icon }) => (
               <NavLink
                 key={to}
                 to={to}
-                end={to === '/'}
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   `nav-link ${isActive ? 'active' : ''}`
@@ -428,26 +539,25 @@ export default function DashboardLayout() {
           {/* Bottom Navigation */}
           <div className="sidebar-bottom">
             <div className="sidebar-section-label">
-              PREFERENCES
+              ACCOUNT
             </div>
 
-            <NavLink
-              to="/settings"
-              onClick={() => setOpen(false)}
-              className={({ isActive }) =>
-                `nav-link ${isActive ? 'active' : ''}`
-              }
-            >
-              <Cog6ToothIcon />
-              <span>Settings</span>
-            </NavLink>
+            {isAutomotiveWorkspace && (
+              <NavLink
+                to="/settings"
+                onClick={() => setOpen(false)}
+                className={({ isActive }) =>
+                  `nav-link ${isActive ? 'active' : ''}`
+                }
+              >
+                <Cog6ToothIcon />
+                <span>Inventory settings</span>
+              </NavLink>
+            )}
 
             <div className="sidebar-note">
               <div className="sidebar-note-eye">
-                <img
-                  src={LOGO_PATH}
-                  alt=""
-                />
+                <img src={LOGO_PATH} alt="" />
               </div>
 
               <strong>Nothing Goes Unnoticed.</strong>
@@ -527,26 +637,33 @@ export default function DashboardLayout() {
               <span className="breadcrumb-divider">/</span>
 
               <strong>
-                {selectedBusiness?.name || 'Inventory'}
+                {selectedBusiness?.name || 'Business'}
+                {isFoodWorkspace
+                  ? ' · Food & Beverage'
+                  : isAutomotiveWorkspace
+                    ? ' · Automotive'
+                    : ''}
               </strong>
             </div>
 
             <div className="topbar-right">
-              <div className="top-search">
-                <MagnifyingGlassIcon />
+              {showAutomotiveSearch && (
+                <div className="top-search">
+                  <MagnifyingGlassIcon />
 
-                <input
-                  placeholder="Search products..."
-                  onKeyDown={event => {
-                    if (event.key === 'Enter') {
-                      navigate(
-                        '/parts?q=' +
-                        encodeURIComponent(event.target.value)
-                      );
-                    }
-                  }}
-                />
-              </div>
+                  <input
+                    placeholder="Search products..."
+                    onKeyDown={event => {
+                      if (event.key === 'Enter') {
+                        navigate(
+                          '/parts?q=' +
+                          encodeURIComponent(event.target.value)
+                        );
+                      }
+                    }}
+                  />
+                </div>
+              )}
 
               <div className="topbar-divider" />
 
@@ -594,9 +711,7 @@ export default function DashboardLayout() {
             </div>
           ) : (
             <div className="page-content">
-              <InventoryProvider businessId={selectedBusinessId}>
-                <Outlet />
-              </InventoryProvider>
+              <Outlet />
             </div>
           )}
 
